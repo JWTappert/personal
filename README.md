@@ -1,0 +1,2 @@
+# personal
+trying out netlify
