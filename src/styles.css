@@ -15,8 +15,13 @@ h1 {
 .hero h1 {
   font-size: 4em;
   color: teal;
+  margin-top: 3em;
+}
+
+.centered {
   height: 10em;
   display: flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center
 }
