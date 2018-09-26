@@ -7,9 +7,10 @@ import { ExperienceComponent } from './experience/experience.component';
 import { SkillsComponent } from './skills/skills.component';
 import { NavComponent } from './nav/nav.component';
 import { ContactComponent } from './contact/contact.component';
+import { FooterComponent } from './footer/footer.component';
 
 @NgModule({
-  declarations: [AppComponent, AboutMeComponent, ExperienceComponent, SkillsComponent, NavComponent, ContactComponent],
+  declarations: [AppComponent, AboutMeComponent, ExperienceComponent, SkillsComponent, NavComponent, ContactComponent, FooterComponent],
   imports: [BrowserModule, AppRoutingModule],
   providers: [],
   bootstrap: [AppComponent]

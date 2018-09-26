@@ -1,12 +1,22 @@
 /* You can add global styles to this file, and also import other style files */
 body {
   font-family: 'Roboto', sans-serif;
-  --accent-color: teal;
+  --primary-color: teal;
+  --accent-color: orange;
 }
 
-h1, h2, h3, h4, h5 {
+h1 {
+  color: var(--primary-color);
+  font-family: 'Notable', sans-serif;
+}
+
+h2, h3, h4, h5 {
   color: var(--accent-color);
   font-family: 'Notable', sans-serif;
+}
+
+.accent {
+  color: var(--accent-color);
 }
 
 .hero {
