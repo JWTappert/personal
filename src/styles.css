@@ -11,6 +11,7 @@ h1, h2, h3, h4, h5 {
 
 .hero {
   min-height: 450px;
+  height: 10em;
 }
 
 .hero h1 {
@@ -21,7 +22,6 @@ h1, h2, h3, h4, h5 {
 }
 
 .centered {
-  height: 10em;
   align-items: center;
   justify-content: center;
 }
