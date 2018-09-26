@@ -1,0 +1,28 @@
+ul {
+  list-style-type: none;
+  margin: 0;
+  padding: 0;
+}
+
+li {
+  display: inline;
+}
+
+a {
+  color: inherit;
+  font-size: .8em;
+  padding: 0 8px 4px 8px;
+  text-decoration: none;
+}
+
+a:hover {
+  color: teal;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.active {
+  color: teal;
+  font-weight: 600;
+  border-bottom: 2px solid teal;
+}
