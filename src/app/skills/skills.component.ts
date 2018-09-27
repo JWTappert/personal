@@ -13,7 +13,10 @@ export class SkillsComponent implements OnInit {
     { skill: 'C#', rank: 3 },
     { skill: 'Tensorflow', rank: 2 },
     { skill: 'Python', rank: 3 },
-    { skill: 'Vim', rank: 4 }
+    { skill: 'Vim', rank: 4 },
+    { skill: 'Pandas', rank: 4 },
+    { skill: 'Go', rank: 1 },
+    { skill: 'Rust', rank: 0 }
   ];
 
   constructor() {}

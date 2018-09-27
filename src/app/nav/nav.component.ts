@@ -9,7 +9,6 @@ export class NavComponent implements OnInit {
   links: NavigationLinks[] = [
     { label: 'about', location: 'about' },
     { label: 'experience', location: 'experience' },
-    { label: 'qualifications', location: 'qualifications' },
     { label: 'contact', location: 'contact' }
   ];
 
