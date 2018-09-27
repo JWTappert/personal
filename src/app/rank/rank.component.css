@@ -1,3 +1,11 @@
-.fas {
+.large-pad-right {
+  padding-right: 50px;
+}
+
+.pull-right {
+  float: right;
+}
+
+.gold {
   color: gold;
 }
