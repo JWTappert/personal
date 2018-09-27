@@ -8,9 +8,10 @@ import { SkillsComponent } from './skills/skills.component';
 import { NavComponent } from './nav/nav.component';
 import { ContactComponent } from './contact/contact.component';
 import { FooterComponent } from './footer/footer.component';
+import { RankComponent } from './rank/rank.component';
 
 @NgModule({
-  declarations: [AppComponent, AboutMeComponent, ExperienceComponent, SkillsComponent, NavComponent, ContactComponent, FooterComponent],
+  declarations: [AppComponent, AboutMeComponent, ExperienceComponent, SkillsComponent, NavComponent, ContactComponent, FooterComponent, RankComponent],
   imports: [BrowserModule, AppRoutingModule],
   providers: [],
   bootstrap: [AppComponent]
