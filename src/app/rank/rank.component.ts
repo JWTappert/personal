@@ -1,5 +1,5 @@
 import { Component, Input, OnInit } from '@angular/core';
-import { Skill } from '../skill/skill.component';
+import { Skill } from '../skills/skills.component';
 
 @Component({
   selector: 'app-rank',

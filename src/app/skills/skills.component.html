@@ -1,6 +1,5 @@
-<div class="container centered">
-    <h2>Skills</h2>
-  <p>
-    Skills works!
-  </p>
-  </div>
+<ul>
+  <li *ngFor="let skill of skills">
+    <app-rank [skill]="skill"></app-rank>
+  </li>
+</ul>
