@@ -25,7 +25,8 @@
                 "glob": "_redirects",
                 "input": "src",
                 "output": "/"
-              }
+              },
+              "src/success.html"
             ],
             "styles": [
               "src/styles.css"

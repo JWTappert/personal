@@ -9,6 +9,7 @@ import { FooterComponent } from './footer/footer.component';
 import { NavComponent } from './nav/nav.component';
 import { RankComponent } from './rank/rank.component';
 import { SkillsComponent } from './skills/skills.component';
+import { SuccessComponent } from './success/success.component';
 
 @NgModule({
   declarations: [
@@ -19,7 +20,8 @@ import { SkillsComponent } from './skills/skills.component';
     NavComponent,
     ContactComponent,
     FooterComponent,
-    RankComponent
+    RankComponent,
+    SuccessComponent
   ],
   imports: [BrowserModule, AppRoutingModule],
   providers: [],
