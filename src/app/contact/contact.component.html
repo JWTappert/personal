@@ -1,6 +1,6 @@
 <div class="container centered">
     <h2>Contact Me</h2>
-    <form name="contact" netlify netlify-honeypot="bot-field" (submit)="handleForm($event)">
+    <form name="contact" netlify method="POST" netlify-honeypot="bot-field">
       <p class="hidden">
         <label>Don’t fill this out if you're human: <input name="bot-field" /></label>
       </p>
@@ -8,7 +8,7 @@
         <label>Name <input type="text" name="name" /></label>
       </p>
       <p>
-        <label>Email <input type="email" name="email" required/></label>
+        <label>Email <input type="email" name="email" /></label>
       </p>
       <p>
         <label>Message <textarea name="message"></textarea></label>
