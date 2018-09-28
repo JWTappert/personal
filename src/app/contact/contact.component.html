@@ -1,6 +1,6 @@
 <div class="container centered">
     <h2>Contact Me</h2>
-    <form name="contact" netlify method="POST" netlify-honeypot="bot-field" action="/success">
+    <form name="contact" netlify netlify-honeypot="bot-field" (submit)="handleForm($event)">
       <p class="hidden">
         <label>Don’t fill this out if you're human: <input name="bot-field" /></label>
       </p>

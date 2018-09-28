@@ -1,3 +1,4 @@
+import { HttpClient } from '@angular/common/http';
 import { Component, OnInit } from '@angular/core';
 
 @Component({
@@ -6,10 +7,24 @@ import { Component, OnInit } from '@angular/core';
   styleUrls: ['./contact.component.css']
 })
 export class ContactComponent implements OnInit {
+  constructor(private http: HttpClient) {}
 
-  constructor() { }
+  ngOnInit() {}
 
-  ngOnInit() {
+  handleForm(form: Object) {
+    this.http
+      .post(
+        '/',
+        {
+          body: {
+            'form-name': 'contact',
+            ...form
+          }
+        },
+        { headers: { 'Content-Type': 'application/x-www-form-urlencoded' } }
+      )
+      .subscribe(response => {
+        console.log(response);
+      });
   }
-
 }
