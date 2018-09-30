@@ -7,28 +7,17 @@ body {
 
 h1 {
   color: var(--primary-color);
-  font-family: 'Notable', sans-serif;
 }
 
-h2, h3, h4, h5 {
+h2,
+h3,
+h4,
+h5 {
   color: var(--accent-color);
-  font-family: 'Notable', sans-serif;
 }
 
 .accent {
   color: var(--accent-color);
-}
-
-.hero {
-  min-height: 450px;
-  height: 10em;
-}
-
-.hero h1 {
-  font-size: 4em;
-  color: teal;
-  margin-top: 3em;
-  margin-bottom: 0;
 }
 
 .centered {
@@ -42,5 +31,5 @@ h2, h3, h4, h5 {
 }
 
 .nav {
-  justify-content: end;
+  margin-top: 15em;
 }

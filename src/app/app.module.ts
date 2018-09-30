@@ -10,6 +10,7 @@ import { NavComponent } from './nav/nav.component';
 import { RankComponent } from './rank/rank.component';
 import { SkillsComponent } from './skills/skills.component';
 import { SuccessComponent } from './success/success.component';
+import { HeroComponent } from './hero/hero.component';
 
 @NgModule({
   declarations: [
@@ -21,7 +22,8 @@ import { SuccessComponent } from './success/success.component';
     ContactComponent,
     FooterComponent,
     RankComponent,
-    SuccessComponent
+    SuccessComponent,
+    HeroComponent
   ],
   imports: [BrowserModule, AppRoutingModule],
   providers: [],
