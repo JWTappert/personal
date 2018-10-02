@@ -1,33 +1,31 @@
-.hero {
-  min-height: 500px;
-  height: 10em;
-  background-color: rgba(0, 0, 0, 0.8);
-}
-
-.hero h1 {
-  font-size: 3em;
-  color: white;
-  margin-top: 40px;
-  text-align: center;
-}
-
-.overlay {
-  background: url('../../assets/drone-shot.jpg');
+.jumbotron {
+  padding: 16rem 8rem;
+  position: relative;
+  background-image: url('../../assets/drone-shot.jpg');
   background-size: cover;
 }
 
-.slidingVertical {
-  width: 250px;
-  margin: 0 auto;
-  flex-direction: column;
-  color: orange;
+.jumbotron::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, .7);
 }
+
+.slidingVertical {
+  display: inline;
+  margin-left: 6px;
+  color: magenta;
+}
+
 
 .slidingVertical span {
   animation: topToBottom 12.5s linear infinite 0s;
   -ms-animation: topToBottom 12.5s linear infinite 0s;
   -webkit-animation: topToBottom 12.5s linear infinite 0s;
-  font-size: 4em;
   opacity: 0;
   overflow: hidden;
   position: absolute;
