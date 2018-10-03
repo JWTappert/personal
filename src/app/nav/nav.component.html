@@ -1,5 +1,5 @@
-<ul>
-  <li *ngFor="let link of links">
-    <a [routerLink]="[link.location]" routerLinkActive="active" >{{ link.label }}</a>
+<ul class="nav justify-content-center">
+  <li class="nav-item" *ngFor="let link of links">
+    <a class="nav-link" [routerLink]="[link.location]" routerLinkActive="active">{{ link.label }}</a>
   </li>
 </ul>
