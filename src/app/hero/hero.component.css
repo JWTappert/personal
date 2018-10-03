@@ -15,11 +15,14 @@
   background: rgba(0, 0, 0, .7);
 }
 
+.lead {
+  color: white;
+}
+
 .slidingVertical {
   display: inline;
   margin-left: 6px;
 }
-
 
 .slidingVertical span {
   animation: topToBottom 15s linear infinite 0s;

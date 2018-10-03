@@ -1,5 +1,13 @@
+a {
+  color: black;
+}
+
+a:hover {
+  color: magenta;
+}
+
 .active {
-  color: teal;
+  color: magenta;
   font-weight: 600;
-  border-bottom: 2px solid teal;
+  border-bottom: 2px solid magenta;
 }
