@@ -11,6 +11,7 @@ import { RankComponent } from './rank/rank.component';
 import { SkillsComponent } from './skills/skills.component';
 import { SuccessComponent } from './success/success.component';
 import { HeroComponent } from './hero/hero.component';
+import { AnimatedComponent } from './animated/animated.component';
 
 @NgModule({
   declarations: [
@@ -23,7 +24,8 @@ import { HeroComponent } from './hero/hero.component';
     FooterComponent,
     RankComponent,
     SuccessComponent,
-    HeroComponent
+    HeroComponent,
+    AnimatedComponent
   ],
   imports: [BrowserModule, AppRoutingModule],
   providers: [],
