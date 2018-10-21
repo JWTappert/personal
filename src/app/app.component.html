@@ -1,14 +1,14 @@
-<div class="content">
+<div class="content" (click)="getRandomColors()">
   <div class="flex-item">
     <h1>Hi, I'm</h1>
   </div>
   <div class="flex-item">
-    <app-name-svg></app-name-svg>
+    <app-name-svg [color]="randColor"></app-name-svg>
   </div>
   <div class="flex-item">
     <h4>You can find me in one of these places...</h4>
   </div>
   <div class="flex-item">
-    <app-footer></app-footer>
+    <app-footer [color]="randColor"></app-footer>
   </div>
 </div>
