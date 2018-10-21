@@ -1,32 +1,11 @@
-import { NgModule } from '@angular/core';
-import { BrowserModule } from '@angular/platform-browser';
-import { AboutMeComponent } from './about-me/about-me.component';
-import { AppComponent } from './app.component';
-import { AppRoutingModule } from './app.routing';
-import { ContactComponent } from './contact/contact.component';
-import { ExperienceComponent } from './experience/experience.component';
-import { FooterComponent } from './footer/footer.component';
-import { NavComponent } from './nav/nav.component';
-import { RankComponent } from './rank/rank.component';
-import { SkillsComponent } from './skills/skills.component';
-import { SuccessComponent } from './success/success.component';
-import { HeroComponent } from './hero/hero.component';
-import { AnimatedComponent } from './animated/animated.component';
+import { NgModule } from "@angular/core";
+import { BrowserModule } from "@angular/platform-browser";
+import { AppComponent } from "./app.component";
+import { AppRoutingModule } from "./app.routing";
+import { FooterComponent } from "./footer/footer.component";
 
 @NgModule({
-  declarations: [
-    AppComponent,
-    AboutMeComponent,
-    ExperienceComponent,
-    SkillsComponent,
-    NavComponent,
-    ContactComponent,
-    FooterComponent,
-    RankComponent,
-    SuccessComponent,
-    HeroComponent,
-    AnimatedComponent
-  ],
+  declarations: [AppComponent, FooterComponent],
   imports: [BrowserModule, AppRoutingModule],
   providers: [],
   bootstrap: [AppComponent]
