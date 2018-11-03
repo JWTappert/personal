@@ -9,6 +9,8 @@ export class FooterComponent implements OnInit {
   @Input()
   color: string;
 
+  emailMe = false;
+
   constructor() {}
 
   ngOnInit() {}
