@@ -1,0 +1,35 @@
+.nav {
+  width: 30%;
+  display: flex;
+  justify-content: space-around;
+}
+
+.link {
+  font-size: 1.2em;
+  position: relative;
+  transition: clip-path 275ms ease;
+  &:hover span::before,
+  &:focus span::before {
+    clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%);
+  }
+  span {
+    position: relative;
+    display: inline-block;
+    color: var(--text-color);
+    &::before {
+      position: absolute;
+      content: attr(data-content);
+      color: var(--text-hover-color);
+      text-decoration: underline;
+      text-decoration-color: var(--text-hover-color);
+      clip-path: polygon(0 0, 0 0, 0% 100%, 0 100%);
+      transition: clip-path 275ms ease;
+    }
+  }
+}
+
+@media (max-width: 768px) {
+  .nav {
+    width: 100%;
+  }
+}

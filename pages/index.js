@@ -1,6 +1,6 @@
 import Head from "next/head";
-import Link from "next/link";
 import Name from "../components/name/name";
+import Nav from "../components/nav/nav";
 
 export default function Home() {
   return (
@@ -10,9 +10,7 @@ export default function Home() {
         <link rel="icon" href="/favicon.ico" />
       </Head>
       <Name />
-      <Link href="/experience">
-        <a>Experience</a>
-      </Link>
+      <Nav />
     </div>
   );
 }
