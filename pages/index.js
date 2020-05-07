@@ -19,8 +19,9 @@ export default function Home() {
       </Head>
       <header>
         <div className="brand">
+          <small>I'm</small>
           <Name />
-          <small>Software & Design</small>
+          <small>and I like to build sh*t</small>
         </div>
 
         <div className="social">
