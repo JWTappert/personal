@@ -36,18 +36,26 @@ export default function Home() {
         }}
       >
         <div className="block" id="intro">
-          Hey, I'm Justin. I'm a software engineer and I have a passion for art
-          and design.
-        </div>
-
-        <div className="block">Why hello there</div>
-
-        <div className="block">
-          <a href="react.html">See react example</a>
+          <div className="card">
+            Hey, I'm Justin. I'm a software engineer and I have a passion for
+            art and design.
+          </div>
         </div>
 
         <div className="block">
-          <a href="#intro">Back to start</a>
+          <div className="card">Why hello there</div>
+        </div>
+
+        <div className="block">
+          <div className="card">
+            <a href="#">See react example</a>
+          </div>
+        </div>
+
+        <div className="block">
+          <div className="card">
+            <a href="#intro">Back to start</a>
+          </div>
         </div>
       </div>
     </React.Fragment>
