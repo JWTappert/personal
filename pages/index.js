@@ -1,7 +1,11 @@
 import Head from "next/head";
 import styled from "styled-components";
+import Link from "next/link";
+import { getAllPosts } from "../lib/posts";
 
-export default function Home() {
+export default function Home({ allPosts }) {
+  const { slug, title } = allPosts[0];
+  const morePosts = allPosts.slice(1);
   return (
     <div className="container">
       <Head>
@@ -11,10 +15,28 @@ export default function Home() {
       <main>
         <Container>
           <h1>Hello World!</h1>
+          <Link as={`/blog/${slug}`} href="/blog/[slug]">
+            <a className="hover:underline">{title}</a>
+          </Link>
         </Container>
       </main>
     </div>
   );
+}
+
+export async function getStaticProps() {
+  const allPosts = getAllPosts([
+    "title",
+    "date",
+    "slug",
+    "author",
+    "coverImage",
+    "excerpt",
+  ]);
+
+  return {
+    props: { allPosts },
+  };
 }
 
 const Container = styled.div`
