@@ -3,8 +3,12 @@ import Head from "next/head";
 import styled from "styled-components";
 import Link from "next/link";
 import { getAllPosts } from "../lib/posts";
+import { GetStaticProps, GetServerSideProps } from "next";
+import { authorized } from "lib/auth";
+import { useRouter } from "next/router";
 
-export default function Home({ allPosts }) {
+export default function Home({ admin, allPosts }) {
+  const router = useRouter();
   const { slug, title } = allPosts[0];
   const morePosts = allPosts.slice(1);
 
@@ -29,7 +33,7 @@ export default function Home({ allPosts }) {
   );
 }
 
-export async function getStaticProps() {
+export const getStaticProps: GetStaticProps = async (context) => {
   const allPosts = getAllPosts([
     "title",
     "date",
@@ -42,7 +46,7 @@ export async function getStaticProps() {
   return {
     props: { allPosts },
   };
-}
+};
 
 const Container = styled.div`
   min-height: 100vh;
