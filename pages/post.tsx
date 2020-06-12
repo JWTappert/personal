@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { GetServerSideProps } from "next";
 import { useRouter } from "next/router";
 import { authorized } from "lib/auth";
@@ -6,7 +6,9 @@ import { authorized } from "lib/auth";
 export default function Post({ admin }) {
   const router = useRouter();
 
-  if (!admin) router.push("/login");
+  useEffect(() => {
+    if (!admin) router.push("/login");
+  }, [admin]);
 
   return (
     <div>
