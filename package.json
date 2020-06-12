@@ -9,10 +9,10 @@
   },
   "dependencies": {
     "bcrypt": "^5.0.0",
+    "cookie": "^0.4.1",
     "date-fns": "^2.14.0",
     "gray-matter": "^4.0.2",
     "hasura": "^2.0.1",
-    "js-cookie": "^2.2.1",
     "jsonwebtoken": "^8.5.1",
     "next": "9.4.1",
     "react": "16.13.1",
@@ -22,9 +22,10 @@
     "styled-components": "^5.1.0"
   },
   "devDependencies": {
+    "@types/cookie": "^0.4.0",
+    "@types/jsonwebtoken": "^8.5.0",
     "@types/node": "^14.0.13",
     "@types/react": "^16.9.36",
-    "@types/js-cookie": "^2.2.6",
     "typescript": "^3.9.5"
   }
 }
