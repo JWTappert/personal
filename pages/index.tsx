@@ -20,6 +20,9 @@ export default function Home({ allPosts }) {
           <Link as={`/blog/${slug}`} href="/blog/[slug]">
             <a className="hover:underline">{title}</a>
           </Link>
+          <Link as={"post"} href="/post">
+            <a>Post</a>
+          </Link>
         </Container>
       </main>
     </div>
