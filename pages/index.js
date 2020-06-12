@@ -1,3 +1,4 @@
+import React from "react";
 import Head from "next/head";
 import styled from "styled-components";
 import Link from "next/link";
@@ -6,8 +7,9 @@ import { getAllPosts } from "../lib/posts";
 export default function Home({ allPosts }) {
   const { slug, title } = allPosts[0];
   const morePosts = allPosts.slice(1);
+
   return (
-    <div className="container">
+    <div>
       <Head>
         <title>T a p p e r t</title>
         {/* <link rel="icon" href="/favicon.ico" /> */}
