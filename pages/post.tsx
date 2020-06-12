@@ -1,8 +1,7 @@
-import React, { useRef } from "react";
+import React from "react";
 import { GetServerSideProps } from "next";
-import { parse } from "cookie";
-import { verify } from "jsonwebtoken";
 import { useRouter } from "next/router";
+import { authorized } from "lib/auth";
 
 export default function Post({ admin }) {
   const router = useRouter();
@@ -18,11 +17,7 @@ export default function Post({ admin }) {
 }
 
 export const getServerSideProps: GetServerSideProps = async (context) => {
-  const cookie = parse(context.req.headers.cookie);
-  let admin = false;
-  verify(cookie.auth, process.env.JWT_SECRET, function (err, decoded) {
-    if (!err) admin = true;
-  });
+  let admin = await authorized(context);
 
   return {
     props: {
