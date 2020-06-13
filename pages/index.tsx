@@ -3,13 +3,10 @@ import Head from "next/head";
 import styled from "styled-components";
 import Link from "next/link";
 import { getAllPosts } from "../lib/posts";
-import { GetStaticProps, GetServerSideProps } from "next";
-import { authorized } from "lib/auth";
-import { useRouter } from "next/router";
+import { GetStaticProps } from "next";
 
 export default function Home(props) {
   const { allPosts } = props;
-  const router = useRouter();
   const { slug, title } = allPosts[0];
   const morePosts = allPosts.slice(1);
 
