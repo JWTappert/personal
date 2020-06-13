@@ -7,7 +7,8 @@ import { GetStaticProps, GetServerSideProps } from "next";
 import { authorized } from "lib/auth";
 import { useRouter } from "next/router";
 
-export default function Home({ admin, allPosts }) {
+export default function Home(props) {
+  const { allPosts } = props;
   const router = useRouter();
   const { slug, title } = allPosts[0];
   const morePosts = allPosts.slice(1);
@@ -55,4 +56,5 @@ const Container = styled.div`
   flex-direction: column;
   justify-content: center;
   align-items: center;
+  color: ${({ theme }) => theme.text};
 `;
