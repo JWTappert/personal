@@ -1,8 +1,10 @@
 // import App from 'next/app'
 import React from "react";
+import Head from "next/head";
 import { useDarkMode } from "lib/hooks/useDarkMode";
-import { ThemeProvider } from "styled-components";
+import styled, { ThemeProvider } from "styled-components";
 import { GlobalStyles } from "global";
+import Nav from "components/layout/nav";
 
 export const lightTheme = {
   body: "#E2E2E2",
@@ -14,7 +16,7 @@ export const lightTheme = {
   inputFill: "#fff",
 
   colors: {
-    primary: "red",
+    primary: "#35c3c1",
     secondary: "green",
   },
 };
@@ -29,7 +31,7 @@ export const darkTheme = {
   inputFill: "#ccc",
 
   colors: {
-    primary: "red",
+    primary: "#35c3c1",
     secondary: "green",
   },
 };
@@ -37,7 +39,6 @@ export const darkTheme = {
 function MyApp(props) {
   const { Component, pageProps } = props;
   const [theme, toggleTheme, componentMounted] = useDarkMode();
-
   const themeMode = theme === "light" ? lightTheme : darkTheme;
 
   if (!componentMounted) {
@@ -45,15 +46,27 @@ function MyApp(props) {
   }
 
   return (
-    <ThemeProvider theme={themeMode} toggleTheme={toggleTheme}>
-      <>
+    <ThemeProvider theme={themeMode}>
+      <Head>
+        <title>d e r p s t a r r</title>
+        {/* <link rel="icon" href="/favicon.ico" /> */}
+      </Head>
+      <Container>
         <GlobalStyles />
-        <button onClick={toggleTheme}>Toggle theme</button>
+        <Nav theme={theme} toggleTheme={toggleTheme} />
         <Component {...pageProps} />
-      </>
+      </Container>
     </ThemeProvider>
   );
 }
+
+const Container = styled.div`
+  min-height: 100vh;
+  color: ${({ theme }) => theme.text};
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+`;
 
 // Only uncomment this method if you have blocking data requirements for
 // every single page in your application. This disables the ability to
