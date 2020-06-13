@@ -1,4 +1,5 @@
 // import App from 'next/app'
+import React, { useState } from "react";
 import { ThemeProvider } from "styled-components";
 import { GlobalStyles } from "./global";
 
@@ -18,9 +19,22 @@ export const darkTheme = {
 
 function MyApp(props) {
   const { Component, pageProps } = props;
+  const [theme, setTheme] = useState("light");
+
+  const toggleTheme = () => {
+    if (theme === "light") {
+      setTheme("dark");
+    } else {
+      setTheme("light");
+    }
+  };
   return (
-    <ThemeProvider theme={darkTheme}>
-      <Component {...pageProps} />
+    <ThemeProvider theme={theme === "light" ? lightTheme : darkTheme}>
+      <>
+        <GlobalStyles />
+        <button onClick={toggleTheme}>Toggle theme</button>
+        <Component {...pageProps} />
+      </>
     </ThemeProvider>
   );
 }
