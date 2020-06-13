@@ -4,6 +4,7 @@ import styled from "styled-components";
 export default function Login() {
   const usernameRef = useRef<HTMLInputElement>(null);
   const passwordRef = useRef<HTMLInputElement>(null);
+  const [authd, setAuthd] = useState(false);
   const [message, setMessage] = useState("");
 
   async function handleSubmit() {
@@ -18,11 +19,14 @@ export default function Login() {
       }),
     });
     const json = await response.json();
-    setMessage(JSON.stringify(json));
+    const { success, message } = json;
+    setAuthd(success);
+    setMessage(message);
   }
 
   return (
     <Container>
+      <h1>{!authd ? "You shall not pass!" : message}</h1>
       <Form>
         <FieldSet>
           <Label>Username</Label>
@@ -36,7 +40,6 @@ export default function Login() {
           Login
         </Submit>
       </Form>
-      <pre>{message}</pre>
     </Container>
   );
 }
@@ -60,10 +63,15 @@ const Submit = styled.button`
 `;
 const Input = styled.input`
   width: 100%;
-  margin: 0;
-  -webkit-box-flex: 1;
-  flex: 1;
   padding: 1em;
+  border: 1px solid ${({ theme }) => theme.invertText}
+  border-radius: 5px;
+
+  &:focus {
+    outline: none;
+    border: 2px solid #35c3c1;
+    border-radius: 5px;
+  }
 `;
 const Label = styled.label`
   color: ${({ theme }) => theme.invertText};
@@ -75,7 +83,7 @@ const Label = styled.label`
   margin-bottom: 2%;
 `;
 const FieldSet = styled.div`
-  margin: 5% 0;
+  margin-bottom: 1em;
 `;
 const Form = styled.form`
   width: 50vw;
@@ -83,5 +91,13 @@ const Form = styled.form`
   border-radius: 20px;
   padding: 2em;
   box-shadow: 0px 56px 72px -30px rgba(50, 55, 63, 0.66);
+
+  @media (max-width: 768px) {
+    width: 100%;
+  }
 `;
-const Container = styled.div``;
+const Container = styled.div`
+  h1 {
+    text-align: center;
+  }
+`;
