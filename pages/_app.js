@@ -2,7 +2,7 @@
 import React from "react";
 import { useDarkMode } from "lib/hooks/useDarkMode";
 import { ThemeProvider } from "styled-components";
-import { GlobalStyles } from "./global";
+import { GlobalStyles } from "global";
 
 export const lightTheme = {
   body: "#E2E2E2",
