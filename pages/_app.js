@@ -6,16 +6,32 @@ import { GlobalStyles } from "global";
 
 export const lightTheme = {
   body: "#E2E2E2",
+  invertBody: "#363537",
   text: "#363537",
+  invertText: "#FAFAFA",
   toggleBorder: "#FFF",
   gradient: "linear-gradient(#39598A, #79D7ED)",
+  inputFill: "#fff",
+
+  colors: {
+    primary: "red",
+    secondary: "green",
+  },
 };
 
 export const darkTheme = {
   body: "#363537",
+  invertBody: "#FFF",
   text: "#FAFAFA",
+  invertText: "#363537",
   toggleBorder: "#6B8096",
   gradient: "linear-gradient(#091236, #1E215D)",
+  inputFill: "#ccc",
+
+  colors: {
+    primary: "red",
+    secondary: "green",
+  },
 };
 
 function MyApp(props) {

@@ -22,40 +22,66 @@ export default function Login() {
   }
 
   return (
-    <>
+    <Container>
       <Form>
-        <Field>
+        <FieldSet>
           <Label>Username</Label>
           <Input type="text" placeholder="Username" ref={usernameRef} />
-        </Field>
-        <Field>
+        </FieldSet>
+        <FieldSet>
           <Label>Password</Label>
-          <Input type="password" placeholder="Username" ref={passwordRef} />
-        </Field>
+          <Input type="password" placeholder="Password" ref={passwordRef} />
+        </FieldSet>
         <Submit onClick={handleSubmit} type="button">
           Login
         </Submit>
       </Form>
       <pre>{message}</pre>
-    </>
+    </Container>
   );
 }
 
 const Submit = styled.button`
+  background-image: linear-gradient(to right, #35c3c1 0%, #00d6b7 100%);
+  color: white;
+  border: 0;
+  border-radius: 5px;
+  text-transform: uppercase;
+  width: 100%;
+  padding: 0.5em;
   font-size: 1.2em;
-  margin-left: 20px;
+
+  &:hover {
+    outline: none;
+    transition: transform 0.15s ease;
+    transform: scale(1.05);
+    cursor: pointer;
+  }
 `;
 const Input = styled.input`
-  padding: 5px 10px;
+  width: 100%;
+  margin: 0;
+  -webkit-box-flex: 1;
+  flex: 1;
+  padding: 1em;
 `;
 const Label = styled.label`
+  color: ${({ theme }) => theme.invertText};
   display: block;
-  font-size: 1.2em;
+  font-size: 0.6em;
+  font-weight: bold;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  margin-bottom: 2%;
 `;
-const Field = styled.div`
-  margin: 1%;
+const FieldSet = styled.div`
+  margin: 5% 0;
 `;
 const Form = styled.form`
-  border: solid 1px black;
-  padding: 1%;
+  width: 50vw;
+  background-color: ${({ theme }) => theme.invertBody};
+  border-radius: 20px;
+  padding: 2em;
+  box-shadow: 0px 56px 72px -30px rgba(50, 55, 63, 0.66);
 `;
+const Container = styled.div``;
