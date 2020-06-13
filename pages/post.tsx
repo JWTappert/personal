@@ -7,7 +7,13 @@ export default function Post({ admin }) {
   const router = useRouter();
 
   useEffect(() => {
-    if (!admin) router.push("/login");
+    if (!admin)
+      router.push({
+        pathname: "/login",
+        query: {
+          redirect: "post",
+        },
+      });
   }, [admin]);
 
   return (

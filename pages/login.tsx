@@ -1,4 +1,5 @@
 import React, { useRef, useState } from "react";
+import { useRouter } from "next/router";
 import styled from "styled-components";
 
 export default function Login() {
@@ -6,6 +7,7 @@ export default function Login() {
   const passwordRef = useRef<HTMLInputElement>(null);
   const [authd, setAuthd] = useState(false);
   const [message, setMessage] = useState("");
+  const router = useRouter();
 
   async function handleSubmit() {
     const response = await fetch("/api/login", {
@@ -22,6 +24,11 @@ export default function Login() {
     const { success, message } = json;
     setAuthd(success);
     setMessage(message);
+
+    if (success)
+      setTimeout(() => {
+        router.push(`/${router.query.redirect}`);
+      }, 1000);
   }
 
   return (
