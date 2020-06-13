@@ -1,5 +1,5 @@
 // import App from 'next/app'
-import React, { useState } from "react";
+import React from "react";
 import { useDarkMode } from "lib/hooks/useDarkMode";
 import { ThemeProvider } from "styled-components";
 import { GlobalStyles } from "./global";
