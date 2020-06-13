@@ -1,5 +1,6 @@
 // import App from 'next/app'
 import React, { useState } from "react";
+import { useDarkMode } from "lib/hooks/useDarkMode";
 import { ThemeProvider } from "styled-components";
 import { GlobalStyles } from "./global";
 
@@ -19,17 +20,16 @@ export const darkTheme = {
 
 function MyApp(props) {
   const { Component, pageProps } = props;
-  const [theme, setTheme] = useState("light");
+  const [theme, toggleTheme, componentMounted] = useDarkMode();
 
-  const toggleTheme = () => {
-    if (theme === "light") {
-      setTheme("dark");
-    } else {
-      setTheme("light");
-    }
-  };
+  const themeMode = theme === "light" ? lightTheme : darkTheme;
+
+  if (!componentMounted) {
+    return <div />;
+  }
+
   return (
-    <ThemeProvider theme={theme === "light" ? lightTheme : darkTheme}>
+    <ThemeProvider theme={themeMode} toggleTheme={toggleTheme}>
       <>
         <GlobalStyles />
         <button onClick={toggleTheme}>Toggle theme</button>
