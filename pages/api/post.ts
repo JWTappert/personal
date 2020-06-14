@@ -7,6 +7,7 @@ export default async (req: NextApiRequest, res: NextApiResponse) => {
     res.status(405).json({ success: false, message: "Method Not Allowed" });
   } else {
     const { filename, content } = req.body;
+    console.log({ filename, content });
 
     if (!filename || !content) {
       res
@@ -23,17 +24,13 @@ export default async (req: NextApiRequest, res: NextApiResponse) => {
       res.status(400).json({ success: false, message: "File already exists" });
     }
 
-    fs.writeFile(`${postsDirectory}/${filename}.md`, content, (err) => {
-      if (!err) {
-        res
-          .status(200)
-          .json({ success: true, message: "Successfully uploaded!" });
+    fs.writeFile(`${postsDirectory}/${filename}.md`, content, "utf8", (err) => {
+      if (err) {
+        throw err;
       }
-      console.error(err);
-      res.status(400).json({
-        success: false,
-        message: "There was an error uploading your post",
-      });
+      res
+        .status(200)
+        .json({ success: true, message: "Successfully uploaded!" });
     });
   }
 };
