@@ -40,7 +40,7 @@ export const Label = styled.label`
   font-weight: bold;
   text-transform: uppercase;
   letter-spacing: 2px;
-  margin-bottom: 2%;
+  margin-bottom: 1em;
 `;
 export const FieldSet = styled.div`
   margin-bottom: 1em;
