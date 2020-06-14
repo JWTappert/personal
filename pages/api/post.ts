@@ -24,7 +24,7 @@ export default async (req: NextApiRequest, res: NextApiResponse) => {
       res.status(400).json({ success: false, message: "File already exists" });
     }
 
-    fs.writeFile(`${postsDirectory}/${filename}.md`, content, "utf8", (err) => {
+    fs.writeFile(`_posts/${filename}.md`, content, "utf8", (err) => {
       if (err) {
         throw err;
       }
