@@ -7,7 +7,9 @@ const returnError = (res: NextApiResponse) =>
   res.status(401).json({ success: false, message: "Unauthorized" });
 
 export default async (req: NextApiRequest, res: NextApiResponse) => {
-  if (req.method === "POST") {
+  if (req.method !== "POST") {
+    res.status(405).json({ success: false, message: "Method Not Allowed" });
+  } else {
     const { username, password } = req.body;
 
     if (username !== process.env.USERNAME) {
@@ -46,9 +48,5 @@ export default async (req: NextApiRequest, res: NextApiResponse) => {
     }
     returnError(res);
     return;
-  }
-
-  if (req.method !== "POST") {
-    res.status(405).json({ success: false, message: "Method Not Allowed" });
   }
 };
