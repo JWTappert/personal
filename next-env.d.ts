@@ -25,3 +25,18 @@ declare module "styled-components" {
     };
   }
 }
+
+export interface Post {
+  title: string;
+  slug: string;
+  content: string;
+  type: PostType;
+  created_at: string;
+  updated_at: string;
+}
+
+export enum PostType {
+  til,
+  personal,
+  public,
+}

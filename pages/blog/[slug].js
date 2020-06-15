@@ -1,6 +1,6 @@
 import { useRouter } from "next/router";
 import ErrorPage from "next/error";
-import { getPostBySlug, getAllPosts } from "../../lib/posts";
+import { getPosts } from "lib/posts";
 import Head from "next/head";
 import markdownToHtml from "../../lib/markdownToHtml";
 import { PostTitle, PostHeader, PostBody } from "components/posts";
@@ -54,7 +54,7 @@ export async function getStaticProps({ params }) {
 }
 
 export async function getStaticPaths() {
-  const posts = getAllPosts(["slug"]);
+  const posts = getPosts();
 
   return {
     paths: posts.map((post) => {

@@ -1,12 +1,12 @@
 import React from "react";
 import Link from "next/link";
-import { getAllPosts } from "lib/posts";
+import { getPosts } from "lib/posts";
 import { GetStaticProps } from "next";
 
 export default function Home(props) {
-  const { allPosts } = props;
-  const { slug, title } = allPosts[0];
-  const morePosts = allPosts.slice(1);
+  const { posts } = props;
+  console.log({ posts });
+  const { slug, title } = posts[0];
 
   return (
     <main>
@@ -19,16 +19,8 @@ export default function Home(props) {
 }
 
 export const getStaticProps: GetStaticProps = async (context) => {
-  const allPosts = getAllPosts([
-    "title",
-    "date",
-    "slug",
-    "author",
-    "coverImage",
-    "excerpt",
-  ]);
-
+  const posts = await getPosts();
   return {
-    props: { allPosts },
+    props: { posts },
   };
 };
