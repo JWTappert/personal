@@ -21,9 +21,8 @@ export default function Post({ post, morePosts, preview }) {
         </Head>
         <PostHeader
           title={post.title}
-          coverImage={post.coverImage}
-          date={post.date}
-          author={post.author}
+          date={post.created_at}
+          author="Justin Tappert"
         />
         <PostBody content={post.content} />
       </article>
@@ -32,21 +31,13 @@ export default function Post({ post, morePosts, preview }) {
 }
 
 export async function getStaticProps({ params }) {
-  const post = getPostBySlug(params.slug, [
-    "title",
-    "date",
-    "slug",
-    "author",
-    "content",
-    "ogImage",
-    "coverImage",
-  ]);
-  const content = await markdownToHtml(post.content || "");
-
+  const posts = await getPosts();
+  const post = posts.filter((p) => p.slug === params.slug);
+  const content = await markdownToHtml(post[0].content || "");
   return {
     props: {
       post: {
-        ...post,
+        ...post[0],
         content,
       },
     },
@@ -54,7 +45,7 @@ export async function getStaticProps({ params }) {
 }
 
 export async function getStaticPaths() {
-  const posts = getPosts();
+  const posts = await getPosts();
 
   return {
     paths: posts.map((post) => {
