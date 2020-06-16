@@ -24,6 +24,9 @@ export const GlobalStyles = createGlobalStyle`
   a {
     color: ${({ theme }) => theme.colors.primary};
     text-decoration: none;
+    font-size: 0.6em;
+    text-transform: uppercase;
+    letter-spacing: 0.5em;
 
     &:hover {
       text-decoration: underline;
