@@ -1,18 +1,12 @@
 import React from "react";
-import Head from "next/head";
-import { Page } from "components/layout";
+import { Page, Title } from "components/layout";
 
 export default function Home() {
   return (
     <Page>
-      <Head>
-        <title>d e r p s t a r r</title>
-        {/* <link rel="icon" href="/favicon.ico" /> */}
-      </Head>
-      <h1>Hello, my name is Justin</h1>
-      <small>
-        This <i>will be</i> the index.js of my life
-      </small>
+      <Title>
+        <h1>/tappert/index.ts</h1>
+      </Title>
     </Page>
   );
 }

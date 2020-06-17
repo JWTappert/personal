@@ -1,10 +1,10 @@
 import React from "react";
 import Link from "next/link";
-import { getPosts } from "lib/posts";
 import { GetStaticProps } from "next";
 import styled from "styled-components";
 import moment from "moment";
-import { Page } from "components/layout";
+import { getPosts } from "lib/posts";
+import { Page, Title } from "components/layout";
 
 export default function Home(props) {
   const { posts } = props;
@@ -12,7 +12,9 @@ export default function Home(props) {
 
   return (
     <Page>
-      <h1>Blog</h1>
+      <Title>
+        <h1>/tappert/blog.ts</h1>
+      </Title>
       <PostCard>
         <Link as={`/blog/${slug}`} href="/blog/[slug]">
           <a className="hover:underline">{title}</a>
