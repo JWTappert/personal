@@ -10,7 +10,7 @@ export default function Home(props) {
   const { slug, title, created_at } = posts[0];
 
   return (
-    <main>
+    <>
       <h1>Blog</h1>
       <PostCard>
         <Link as={`/blog/${slug}`} href="/blog/[slug]">
@@ -22,7 +22,7 @@ export default function Home(props) {
           {moment(created_at).format("HH:mm")}
         </small>
       </PostCard>
-    </main>
+    </>
   );
 }
 

@@ -8,7 +8,7 @@ export default function Nav({ theme, toggleTheme }) {
 
   const links = [
     {
-      mainText: "家",
+      mainText: "自宅",
       altText: "home",
       href: "/",
     },

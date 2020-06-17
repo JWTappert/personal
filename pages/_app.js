@@ -53,19 +53,22 @@ function MyApp(props) {
       </Head>
       <Container>
         <GlobalStyles />
-        <Nav theme={theme} toggleTheme={toggleTheme} />
         <Component {...pageProps} />
+        <Nav theme={theme} toggleTheme={toggleTheme} />
       </Container>
     </ThemeProvider>
   );
 }
 
 const Container = styled.div`
-  min-height: 100vh;
-  color: ${({ theme }) => theme.text};
   display: flex;
   flex-direction: column;
+  justify-content: center;
   align-items: center;
+  width: calc(100vw - 50px);
+  height: calc(100vh - 100px);
+  min-height: 100vh;
+  color: ${({ theme }) => theme.text};
 `;
 
 // Only uncomment this method if you have blocking data requirements for
