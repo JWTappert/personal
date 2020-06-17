@@ -4,13 +4,14 @@ import { getPosts } from "lib/posts";
 import { GetStaticProps } from "next";
 import styled from "styled-components";
 import moment from "moment";
+import { Page } from "components/layout";
 
 export default function Home(props) {
   const { posts } = props;
   const { slug, title, created_at } = posts[0];
 
   return (
-    <>
+    <Page>
       <h1>Blog</h1>
       <PostCard>
         <Link as={`/blog/${slug}`} href="/blog/[slug]">
@@ -22,7 +23,7 @@ export default function Home(props) {
           {moment(created_at).format("HH:mm")}
         </small>
       </PostCard>
-    </>
+    </Page>
   );
 }
 

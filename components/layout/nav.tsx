@@ -20,21 +20,19 @@ export default function Nav({ theme, toggleTheme }) {
   ];
 
   return (
-    <div>
-      <NavBar>
-        {links.map((link, index) => (
-          <Link key={index} href={link.href}>
-            <a
-              onMouseOver={() => setHover(!hover)}
-              onMouseOut={() => setHover(!hover)}
-            >
-              {hover ? link.altText : link.mainText}
-            </a>
-          </Link>
-        ))}
-        <Toggle onClick={toggleTheme}>{toggleText}</Toggle>
-      </NavBar>
-    </div>
+    <NavBar>
+      {links.map((link, index) => (
+        <Link key={index} href={link.href}>
+          <a
+            onMouseOver={() => setHover(!hover)}
+            onMouseOut={() => setHover(!hover)}
+          >
+            {hover ? link.altText : link.mainText}
+          </a>
+        </Link>
+      ))}
+      <Toggle onClick={toggleTheme}>{toggleText}</Toggle>
+    </NavBar>
   );
 }
 
@@ -50,4 +48,5 @@ const NavBar = styled.nav`
   align-items: center;
   justify-content: space-around;
   padding: 1em;
+  margin-bottom: 1em;
 `;
