@@ -10,6 +10,9 @@ export default function Home() {
         {/* <link rel="icon" href="/favicon.ico" /> */}
       </Head>
       <h1>Hello, my name is Justin</h1>
+      <small>
+        This <i>will be</i> the index.js of my life
+      </small>
     </Page>
   );
 }
