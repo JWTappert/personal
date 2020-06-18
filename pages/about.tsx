@@ -12,14 +12,19 @@ export default function About({}) {
         <p>
           My name is Justin and I am currently a software engineer living and
           working in Bend, Oregon. This site is mostly aimed at compiling all
-          the experiements and museings from my life and professional career. I
-          graduated from Oregon State University in 2018 with a bachelors degree
-          in computer science. Before the age of twenty-four I hadn't written a
-          single line of code. I took CS120 - Intro to Programming at my local
-          community college as a filler elective while pursuing a degree in
-          education and I knew instantly that I had found what I wanted to do
-          for the rest of my life. I have been writing code professionally for a
-          number of years now and nothing has changed.
+          the experiments and musings from my life and professional career. I
+          graduated from Oregon State University in 2018 with a bachelor's
+          degree in computer science. Before the age of twenty-four, I hadn't
+          written a single line of code. I took CS120 - Intro to Programming at
+          my local community college as a filler elective while pursuing a
+          degree in education and I knew instantly that I had found what I
+          wanted to do for the rest of my life. I switched majors and graduated
+          a couple of years later. I have been writing code professionally for
+          several years now and nothing has changed.
+        </p>
+        <p>
+          I have always had an affinity for creating things, the only thing that
+          has change is the medium.
         </p>
       </Body>
     </Page>
