@@ -40,3 +40,13 @@ export enum PostType {
   personal,
   public,
 }
+
+export interface JobHistory {
+  companyName: string;
+  website: string;
+  logo: string;
+  postition: string;
+  started: string;
+  ended: string;
+  description: string;
+}
