@@ -1,20 +1,20 @@
-import React, { useState } from "react";
+import React from "react";
 import Link from "next/link";
 import styled from "styled-components";
 
 export default function Nav({ theme, toggleTheme }) {
   const toggleText = theme === "light" ? "😈" : "😇";
-  const [hover, setHover] = useState(false);
-
   const links = [
     {
-      mainText: "自宅",
-      altText: "home",
+      text: "root",
       href: "/",
     },
     {
-      mainText: "ブログ",
-      altText: "blog",
+      text: "about",
+      href: "/about",
+    },
+    {
+      text: "blog",
       href: "/blog",
     },
   ];
@@ -23,12 +23,7 @@ export default function Nav({ theme, toggleTheme }) {
     <NavBar>
       {links.map((link, index) => (
         <Link key={index} href={link.href}>
-          <a
-            onMouseOver={() => setHover(!hover)}
-            onMouseOut={() => setHover(!hover)}
-          >
-            {hover ? link.altText : link.mainText}
-          </a>
+          <a>{link.text}</a>
         </Link>
       ))}
       <Toggle onClick={toggleTheme}>{toggleText}</Toggle>
