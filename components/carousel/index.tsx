@@ -22,7 +22,7 @@ export default function Carousel({ jobs }) {
 
   return (
     <Container>
-      <Button type="button" onClick={() => prev()}>
+      <Button onClick={() => prev()}>
         <span className="material-icons">keyboard_arrow_left</span>
       </Button>
       <ContentBody>
@@ -51,7 +51,7 @@ export default function Carousel({ jobs }) {
         </Header>
         <p>{description}</p>
       </ContentBody>
-      <Button type="button" onClick={() => next()}>
+      <Button onClick={() => next()}>
         <span className="material-icons">keyboard_arrow_right</span>
       </Button>
     </Container>
