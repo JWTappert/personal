@@ -20,6 +20,10 @@ function MyApp(props) {
     <ThemeProvider theme={themeMode}>
       <Head>
         <title>d e r p s t a r r</title>
+        <link
+          href="https://fonts.googleapis.com/icon?family=Material+Icons"
+          rel="stylesheet"
+        ></link>
         {/* <link rel="icon" href="/favicon.ico" /> */}
       </Head>
       <Container>

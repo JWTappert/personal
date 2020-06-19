@@ -1,51 +1,84 @@
 import React, { useState } from "react";
 import styled from "styled-components";
 import moment from "moment";
+import markdownToHtml from "lib/markdownToHtml";
 
-export default function Carousel({ history }) {
+export default function Carousel({ jobs }) {
   const [currentIndex, setCurrentIndex] = useState(0);
+  const { company, description, website, start, end, position, logo } = jobs[
+    currentIndex
+  ];
 
   function next() {
-    const next = (currentIndex + 1) % history.length;
+    const next = (currentIndex + 1) % jobs.length;
     setCurrentIndex(next);
   }
 
   function prev() {
-    let prev = (currentIndex - 1) % history.length;
-    if (prev < 0) prev = history.length - 1;
+    let prev = (currentIndex - 1) % jobs.length;
+    if (prev < 0) prev = jobs.length - 1;
     setCurrentIndex(prev);
   }
 
   return (
     <Container>
       <Button type="button" onClick={() => prev()}>
-        prev
+        <span className="material-icons">keyboard_arrow_left</span>
       </Button>
       <ContentBody>
         <Header>
           <Title>
-            <h2>{history[currentIndex].companyName}</h2>
-            <small>{history[currentIndex].website}</small>
-            <p>
-              From: {moment(history[currentIndex].started).format("M/D/YY")}
-            </p>
-            <p>Until: {moment(history[currentIndex].ended).format("M/D/YY")}</p>
+            <h1>{company}</h1>
+            <small>
+              <a href={`https://${website}`}>{website}</a>
+            </small>
+            <PositionSection>
+              <h4>Title: {position}</h4>
+              <small>From: {moment(start).format("M/D/YY")}</small>
+              &nbsp;&nbsp;
+              <small>
+                Until: {!!end ? moment(end).format("M/D/YY") : "Now"}
+              </small>
+            </PositionSection>
           </Title>
-          <img src={history[currentIndex].logo} />
+          <Logo
+            src={
+              logo?.url
+                ? `https://quiet-island-86124.herokuapp.com${logo.url}`
+                : "https://via.placeholder.com/150"
+            }
+          />
         </Header>
-        <p>{history[currentIndex].description}</p>
+        <p>{description}</p>
       </ContentBody>
       <Button type="button" onClick={() => next()}>
-        next
+        <span className="material-icons">keyboard_arrow_right</span>
       </Button>
     </Container>
   );
 }
 
+const Logo = styled.img`
+  padding: 2em;
+  max-width: 50%;
+  margin: auto;
+`;
+
+const PositionSection = styled.div``;
+
 const Title = styled.div`
   display: flex;
   flex-direction: column;
   padding: 2em;
+  max-width: 50%;
+
+  h1,
+  h4 {
+    margin-bottom: 0;
+  }
+  small {
+    margin-bottom: 0.83em;
+  }
 `;
 
 const Header = styled.div`
@@ -55,7 +88,6 @@ const Header = styled.div`
 `;
 
 const ContentBody = styled.div`
-  border: 1px solid ${({ theme }) => theme.colors.primary};
   width: 100%;
   height: 100%;
   display: flex;
@@ -63,9 +95,7 @@ const ContentBody = styled.div`
   padding: 2em;
 `;
 
-const Button = styled.button`
-  border: 1px solid ${({ theme }) => theme.colors.primary};
-  border-radius: 40%;
+const Button = styled.span`
   padding: 2em;
   color: ${({ theme }) => theme.colors.primary};
   background-color: transparent;
@@ -73,11 +103,11 @@ const Button = styled.button`
   &:hover {
     color: ${({ theme }) => theme.invertText};
     background-color: ${({ theme }) => theme.colors.primary};
+    cursor: pointer;
   }
 `;
 
 const Container = styled.div`
-  border: 1px solid ${({ theme }) => theme.colors.primary};
   width: 100%;
   height: 40vh;
   display: flex;

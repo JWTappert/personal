@@ -42,11 +42,39 @@ export enum PostType {
 }
 
 export interface JobHistory {
-  companyName: string;
+  id: number;
+  created_at: string;
+  updated_at: string;
+  Jobs: Job[];
+}
+
+export interface Job {
+  id: number;
+  company: string;
   website: string;
-  logo: string;
-  postition: string;
-  started: string;
-  ended: string;
+  position: string;
+  start: string;
+  end: string;
   description: string;
+  descriptionHtml: string;
+  logo: Logo;
+}
+
+interface Logo {
+  id: number;
+  name: string;
+  alternativeText: string;
+  caption: string;
+  width: number;
+  height: number;
+  formats: any;
+  hash: string;
+  ext: string;
+  mime: string;
+  size: number;
+  url: string;
+  previewUrl: string;
+  provider: string;
+  created_at: string;
+  updated_at: string;
 }
