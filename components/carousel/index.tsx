@@ -9,6 +9,8 @@ export default function Carousel({ jobs }) {
     currentIndex
   ];
 
+  console.log({ logo });
+
   function next() {
     const next = (currentIndex + 1) % jobs.length;
     setCurrentIndex(next);
@@ -42,11 +44,7 @@ export default function Carousel({ jobs }) {
             </PositionSection>
           </Title>
           <Logo
-            src={
-              logo?.url
-                ? `https://quiet-island-86124.herokuapp.com${logo.url}`
-                : "https://via.placeholder.com/150"
-            }
+            src={logo?.url ? logo.url : "https://via.placeholder.com/150"}
           />
         </Header>
         <p>{description}</p>
