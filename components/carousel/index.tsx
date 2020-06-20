@@ -142,12 +142,13 @@ const Button = styled.span`
 `;
 
 const Container = styled.div`
-  border: 1px solid gainsboro;
+  // border: 1px solid gainsboro;
   width: 100%;
-  height: 50vh;
+  height: 100vh;
   display: flex;
   align-items: center;
   justify-content: center;
+  margin-bottom: 4em;
 
   @media (max-width: 768px) {
     height: 100vh;

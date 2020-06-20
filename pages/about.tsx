@@ -29,7 +29,7 @@ export default function About({ jobs }) {
           I have always had an affinity for creating things, the only thing that
           has change is the medium.
         </p>
-        <h2>Professional History</h2>
+        <h2>work</h2>
         <Carousel jobs={jobs} />
       </Body>
     </Page>

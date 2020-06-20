@@ -39,11 +39,14 @@ const Toggle = styled.a`
 `;
 const NavBar = styled.nav`
   background-color: ${({ theme }) => theme.body};
-  width: 100vw;
+  width: 100%;
   display: flex;
   flex-shrink: 0;
   align-items: center;
   justify-content: space-around;
   padding: 1em;
-  margin-bottom: 1em;
+
+  border-top: 1px solid ${({ theme }) => theme.colors.primary};
+  position: fixed;
+  bottom: 0;
 `;
