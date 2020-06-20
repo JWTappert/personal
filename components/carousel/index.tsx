@@ -76,6 +76,10 @@ const Logo = styled.img`
   max-width: 150px;
   height: auto;
   margin: auto;
+
+  @media (max-width: 768px) {
+    display: none;
+  }
 `;
 
 const PositionSection = styled.div``;
@@ -93,12 +97,20 @@ const Title = styled.div`
   small {
     margin-bottom: 0.83em;
   }
+
+  @media (max-width: 768px) {
+    max-width: unset;
+  }
 `;
 
 const Header = styled.div`
   display: flex;
   align-items: center;
   justify-content: space-between;
+
+  @media (max-width: 768px) {
+    flex-direction: column;
+  }
 `;
 
 const ContentBody = styled.div`
