@@ -38,8 +38,10 @@ const Toggle = styled.a`
   }
 `;
 const NavBar = styled.nav`
+  background-color: ${({ theme }) => theme.body};
   width: 100vw;
   display: flex;
+  flex-shrink: 0;
   align-items: center;
   justify-content: space-around;
   padding: 1em;

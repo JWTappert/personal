@@ -19,7 +19,7 @@ function MyApp(props) {
   return (
     <ThemeProvider theme={themeMode}>
       <Head>
-        <title>d e r p s t a r r</title>
+        <title>t a p p e r t . i o</title>
         <link
           href="https://fonts.googleapis.com/icon?family=Material+Icons"
           rel="stylesheet"

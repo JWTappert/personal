@@ -9,8 +9,6 @@ export default function Carousel({ jobs }) {
     currentIndex
   ];
 
-  console.log({ logo });
-
   function next() {
     const next = (currentIndex + 1) % jobs.length;
     setCurrentIndex(next);
@@ -47,7 +45,7 @@ export default function Carousel({ jobs }) {
             src={logo?.url ? logo.url : "https://via.placeholder.com/150"}
           />
         </Header>
-        <p>{description}</p>
+        <Description>{description}</Description>
       </ContentBody>
       <Button onClick={() => next()}>
         <span className="material-icons">keyboard_arrow_right</span>
@@ -56,9 +54,27 @@ export default function Carousel({ jobs }) {
   );
 }
 
+const Description = styled.div`
+  overflow-y: scroll;
+
+  &::-webkit-scrollbar-track {
+    background-color: ${({ theme }) => theme.invertBody};
+  }
+
+  &::-webkit-scrollbar {
+    width: 3px;
+    background-color: ${({ theme }) => theme.invertBody};
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background-color: ${({ theme }) => theme.body};
+  }
+`;
+
 const Logo = styled.img`
   padding: 2em;
-  max-width: 50%;
+  max-width: 150px;
+  height: auto;
   margin: auto;
 `;
 
@@ -91,6 +107,10 @@ const ContentBody = styled.div`
   display: flex;
   flex-direction: column;
   padding: 2em;
+
+  @media (max-width: 768px) {
+    padding: 1em;
+  }
 `;
 
 const Button = styled.span`
@@ -103,12 +123,21 @@ const Button = styled.span`
     background-color: ${({ theme }) => theme.colors.primary};
     cursor: pointer;
   }
+
+  @media (max-width: 768px) {
+    padding: 0;
+  }
 `;
 
 const Container = styled.div`
+  border: 1px solid gainsboro;
   width: 100%;
-  height: 40vh;
+  height: 50vh;
   display: flex;
   align-items: center;
   justify-content: center;
+
+  @media (max-width: 768px) {
+    height: 100vh;
+  }
 `;
