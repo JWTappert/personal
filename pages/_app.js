@@ -1,5 +1,5 @@
 // import App from 'next/app'
-import React from "react";
+import React, { useEffect } from "react";
 import Head from "next/head";
 import { useDarkMode } from "lib/hooks/useDarkMode";
 import styled, { ThemeProvider } from "styled-components";
