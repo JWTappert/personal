@@ -9,12 +9,20 @@ import Nav from "components/layout/nav";
 import Router from "next/router";
 import * as gtag from "lib/gtm";
 
-Router.events.on("routeChangeComplete", (url) => gtag.pageview(url));
-
 function MyApp(props) {
   const { Component, pageProps } = props;
   const [theme, toggleTheme, componentMounted] = useDarkMode();
   const themeMode = theme === "light" ? lightTheme : darkTheme;
+
+  useEffect(() => {
+    const handleRouteChange = (url) => {
+      gtag.pageview(url);
+    };
+    Router.events.on("routeChangeComplete", handleRouteChange);
+    return () => {
+      Router.events.off("routeChangeComplete", handleRouteChange);
+    };
+  }, []);
 
   if (!componentMounted) {
     return <div />;
