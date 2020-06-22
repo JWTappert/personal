@@ -55,7 +55,7 @@ export default function Carousel({ jobs }) {
 }
 
 const Description = styled.div`
-  overflow-y: scroll;
+  overflow-y: auto;
 
   &::-webkit-scrollbar-track {
     background-color: ${({ theme }) => theme.invertBody};
@@ -126,13 +126,13 @@ const ContentBody = styled.div`
 `;
 
 const Button = styled.span`
-  padding: 2em;
   color: ${({ theme }) => theme.colors.primary};
   background-color: transparent;
 
   &:hover {
     color: ${({ theme }) => theme.invertText};
     background-color: ${({ theme }) => theme.colors.primary};
+    border-radius: 50%;
     cursor: pointer;
   }
 

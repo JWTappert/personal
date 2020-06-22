@@ -28,9 +28,12 @@ declare module "styled-components" {
 
 export interface Post {
   title: string;
+  excerpt: string;
+  private: boolean;
   slug: string;
   content: string;
   type: PostType;
+  hero: Media;
   created_at: string;
   updated_at: string;
 }
@@ -39,7 +42,13 @@ export enum PostType {
   til,
   personal,
   public,
+  finance,
+  tech,
+  music,
+  arts,
 }
+
+export interface Media {}
 
 export interface JobHistory {
   id: number;
