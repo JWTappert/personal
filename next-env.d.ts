@@ -26,6 +26,14 @@ declare module "styled-components" {
   }
 }
 
+export interface Blog {
+  id: number;
+  description: string;
+  created_at: string;
+  updated_at: string;
+  posts: Post[];
+}
+
 export interface Post {
   title: string;
   excerpt: string;
@@ -34,8 +42,7 @@ export interface Post {
   content: string;
   type: PostType;
   hero: Media;
-  created_at: string;
-  updated_at: string;
+  posted_at: string;
 }
 
 export enum PostType {

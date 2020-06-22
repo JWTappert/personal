@@ -21,7 +21,7 @@ export default function Post({ post, morePosts, preview }) {
       </Head>
       <PostHeader
         title={post.title}
-        date={post.created_at}
+        date={post.posted_at}
         author="Justin Tappert"
       />
       <PostBody content={post.content} />
