@@ -1,9 +1,12 @@
 /// <reference types="next" />
 /// <reference types="next/types/global" />
-// import original module declarations
 import "styled-components";
 
-// and extend them!
+declare global {
+  interface Window {
+    gtag: any;
+  }
+}
 declare module "styled-components" {
   export interface DefaultTheme {
     borderRadius: string;

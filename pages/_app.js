@@ -6,6 +6,10 @@ import styled, { ThemeProvider } from "styled-components";
 import { GlobalStyles } from "global";
 import { lightTheme, darkTheme } from "theme";
 import Nav from "components/layout/nav";
+import Router from "next/router";
+import * as gtag from "lib/gtm";
+
+Router.events.on("routeChangeComplete", (url) => gtag.pageview(url));
 
 function MyApp(props) {
   const { Component, pageProps } = props;
