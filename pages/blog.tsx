@@ -9,7 +9,6 @@ import markdownToHtml from "lib/markdownToHtml";
 
 export default function Home(props) {
   const { content, posts } = props;
-  const { slug, title, excerpt, posted_at } = posts[0];
 
   return (
     <Page>
@@ -20,17 +19,20 @@ export default function Home(props) {
         <h2>ramblings</h2>
         <div dangerouslySetInnerHTML={{ __html: content }} />
         <PostGrid>
-          <PostCard>
-            <Link as={`/blog/${slug}`} href="/blog/[slug]">
-              <a className="hover:underline">{title}</a>
-            </Link>
-            <br />
-            <p>{excerpt}</p>
-            <small>
-              Posted at: {moment(posted_at).format("M/DD")} at{" "}
-              {moment(posted_at).format("HH:mm")}
-            </small>
-          </PostCard>
+          {posts &&
+            posts.map((post) => (
+              <PostCard key={post.id}>
+                <Link as={`/blog/${post.slug}`} href="/blog/[slug]">
+                  <a className="hover:underline">{post.title}</a>
+                </Link>
+                <br />
+                <p>{post.excerpt}</p>
+                <small>
+                  Posted at: {moment(post.posted_at).format("M/DD")} at{" "}
+                  {moment(post.posted_at).format("HH:mm")}
+                </small>
+              </PostCard>
+            ))}
         </PostGrid>
       </Body>
     </Page>
@@ -54,4 +56,5 @@ const PostCard = styled.div`
   border: 1px solid ${({ theme }) => theme.colors.primary};
   border-radius: 10px;
   padding: 1em;
+  margin-bottom: 1em;
 `;
