@@ -4,7 +4,7 @@ import "styled-components";
 
 declare global {
   interface Window {
-    gtag: any;
+    gtag: Function;
   }
 }
 declare module "styled-components" {

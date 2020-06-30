@@ -20,7 +20,7 @@ export default function Home(props) {
         <div dangerouslySetInnerHTML={{ __html: content }} />
         <PostGrid>
           {posts &&
-            posts.map((post) => (
+            posts.reverse().map((post) => (
               <PostCard key={post.id}>
                 <Link as={`/blog/${post.slug}`} href="/blog/[slug]">
                   <a className="hover:underline">{post.title}</a>
