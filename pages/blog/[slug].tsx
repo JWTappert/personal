@@ -4,7 +4,7 @@ import { getPosts } from "lib/posts";
 import Head from "next/head";
 import markdownToHtml from "lib/markdownToHtml";
 import { PostTitle, PostHeader, PostBody } from "components/posts";
-import { Page } from "components/layout";
+import { Page, Title, Body } from "components/layout";
 
 export default function Post({ post, morePosts, preview }) {
   const router = useRouter();
@@ -19,12 +19,17 @@ export default function Post({ post, morePosts, preview }) {
         <title>{post.title}</title>
         {/* <meta property="og:image" content={post.ogImage.url} /> */}
       </Head>
-      <PostHeader
-        title={post.title}
-        date={post.posted_at}
-        author="Justin Tappert"
-      />
-      <PostBody content={post.content} />
+      <Title>
+        <h1>/tappert/blog/{post.slug}</h1>
+      </Title>
+      <Body>
+        <PostHeader
+          title={post.title}
+          date={post.posted_at}
+          author="Justin Tappert"
+        />
+        <PostBody content={post.content} />
+      </Body>
     </Page>
   );
 }
