@@ -6,7 +6,7 @@ export default function Nav({ theme, toggleTheme }) {
   const toggleText = theme === "light" ? "😈" : "😇";
   const links = [
     {
-      text: "root",
+      text: "index",
       href: "/",
     },
     {

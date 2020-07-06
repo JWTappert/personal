@@ -13,7 +13,7 @@ export default function Home(props) {
   return (
     <Page>
       <Title>
-        <h1>/tappert/blog.ts</h1>
+        <h1>/tappert/blog</h1>
       </Title>
       <Body>
         <h2>ramblings</h2>

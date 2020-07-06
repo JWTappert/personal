@@ -8,7 +8,7 @@ export default function About({ jobs }) {
   return (
     <Page>
       <Title>
-        <h1>/tappert/about.ts</h1>
+        <h1>/tappert/about</h1>
       </Title>
       <Body>
         <h2>about me</h2>
