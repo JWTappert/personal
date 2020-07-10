@@ -6,7 +6,7 @@ export default function Home() {
   const themeContext = useContext(ThemeContext);
 
   function adjustIconColor(icon: string): string {
-    const iconBaseUrl = `https://img.icons8.com/ios/50/`;
+    const iconBaseUrl = `https://img.icons8.com/ios/30/`;
     return `${iconBaseUrl}${themeContext.text.substr(1)}/${icon}`;
   }
 
@@ -15,24 +15,41 @@ export default function Home() {
       <Title>
         <h1>/tappert/index</h1>
       </Title>
-      <Body>
-        <SocialLinks>
-          {social.map((soc) => (
-            <a href={soc.link}>
-              <img alt={soc.name} src={adjustIconColor(soc.icon)} />
-            </a>
-          ))}
-        </SocialLinks>
-      </Body>
+      <HomeBody>
+        <Container>
+          <Text>look around if ya want...</Text>
+          <SocialLinks>
+            {social.map((soc) => (
+              <a href={soc.link}>
+                <img alt={soc.name} src={adjustIconColor(soc.icon)} />
+              </a>
+            ))}
+          </SocialLinks>
+        </Container>
+      </HomeBody>
     </Page>
   );
 }
+
+const Text = styled.p`
+  margin-bottom: 50px;
+`;
 
 const SocialLinks = styled.div`
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-top: 40vh;
+`;
+
+const Container = styled.div`
+  display: flex;
+  height: 100%;
+  flex-direction: column;
+  justify-content: center;
+`;
+
+const HomeBody = styled(Body)`
+  height: 90%;
 `;
 
 const social = [
