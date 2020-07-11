@@ -26,17 +26,16 @@ export default function Skull(props) {
     const skull: THREE.Group = new THREE.Group();
     let head: THREE.Mesh;
     let jaw: THREE.Mesh;
+    const material = new THREE.MeshBasicMaterial({
+      color: theme.colors.primary,
+      wireframe: true,
+    });
 
     loader.load(
       "/models/skull.obj",
       function (object: any) {
         geometrySkull = object.children[1].geometry;
         geometrySkullJaw = object.children[0].geometry;
-
-        const material = new THREE.MeshBasicMaterial({
-          color: theme.colors.primary,
-          wireframe: true,
-        });
 
         head = new THREE.Mesh(geometrySkull, material);
         jaw = new THREE.Mesh(geometrySkullJaw, material);
