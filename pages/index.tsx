@@ -1,5 +1,6 @@
 import React, { useContext } from "react";
 import { Page, Title, Body } from "components/layout";
+import { Skull } from "components/skull";
 import styled, { ThemeContext } from "styled-components";
 
 export default function Home() {
@@ -17,10 +18,11 @@ export default function Home() {
       </Title>
       <HomeBody>
         <Container>
+          <Skull />
           <Text>look around if ya want...</Text>
           <SocialLinks>
             {social.map((soc) => (
-              <a href={soc.link}>
+              <a href={soc.link} key={soc.link}>
                 <img alt={soc.name} src={adjustIconColor(soc.icon)} />
               </a>
             ))}
@@ -43,7 +45,7 @@ const SocialLinks = styled.div`
 
 const Container = styled.div`
   display: flex;
-  height: 100%;
+  height: 80vh;
   flex-direction: column;
   justify-content: center;
 `;
