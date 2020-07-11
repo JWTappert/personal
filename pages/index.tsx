@@ -7,8 +7,8 @@ export default function Home() {
   const themeContext = useContext(ThemeContext);
 
   function adjustIconColor(icon: string): string {
-    const iconBaseUrl = `https://img.icons8.com/ios/30/`;
-    return `${iconBaseUrl}${themeContext.text.substr(1)}/${icon}`;
+    const iconBaseUrl = `https://img.icons8.com/ios/20/`;
+    return `${iconBaseUrl}${themeContext.colors.primary.substr(1)}/${icon}`;
   }
 
   return (

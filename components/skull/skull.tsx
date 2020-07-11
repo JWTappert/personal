@@ -1,5 +1,6 @@
 import { useRef, useEffect, useState, useContext } from "react";
 import * as THREE from "three";
+import { OBJLoader } from "node_modules/three/examples/jsm/loaders/OBJLoader";
 import styled, { ThemeContext } from "styled-components";
 
 export default function Skull(props) {
@@ -19,15 +20,41 @@ export default function Skull(props) {
       antialias: true,
       alpha: true,
     });
-    const geometry = new THREE.SphereGeometry(1, 32, 16);
-    const material = new THREE.MeshBasicMaterial({
-      color: theme.colors.primary,
-      wireframe: true,
-    });
-    const cube = new THREE.Mesh(geometry, material);
+    const loader = new OBJLoader();
+    let geometrySkull: THREE.BufferGeometry;
+    let geometrySkullJaw: THREE.BufferGeometry;
+    const skull: THREE.Group = new THREE.Group();
+    let head: THREE.Mesh;
+    let jaw: THREE.Mesh;
 
-    camera.position.z = 4;
-    scene.add(cube);
+    loader.load(
+      "/models/skull.obj",
+      function (object: any) {
+        geometrySkull = object.children[1].geometry;
+        geometrySkullJaw = object.children[0].geometry;
+
+        const material = new THREE.MeshBasicMaterial({
+          color: theme.colors.primary,
+          wireframe: true,
+        });
+
+        head = new THREE.Mesh(geometrySkull, material);
+        jaw = new THREE.Mesh(geometrySkullJaw, material);
+        skull.add(head);
+        skull.add(jaw);
+        scene.add(skull);
+      },
+      function (xhr) {
+        console.log((xhr.loaded / xhr.total) * 100 + "% loaded");
+      },
+      function (error) {
+        console.log({ error });
+        console.log("An error happened");
+      }
+    );
+
+    camera.position.z = 10;
+    // scene.add(cube);
     renderer.setSize(width, height);
 
     const renderScene = () => {
@@ -44,8 +71,8 @@ export default function Skull(props) {
     };
 
     const animate = () => {
-      cube.rotation.x += 0.005;
-      cube.rotation.y += 0.005;
+      // skull.rotation.x += 0.005;
+      skull.rotation.y += 0.005;
 
       renderScene();
       frameId = window.requestAnimationFrame(animate);
@@ -73,8 +100,9 @@ export default function Skull(props) {
       window.removeEventListener("resize", handleResize);
       mount.current.removeChild(renderer.domElement);
 
-      scene.remove(cube);
-      geometry.dispose();
+      scene.remove(skull);
+      geometrySkull.dispose();
+      geometrySkullJaw.dispose();
       material.dispose();
     };
   }, []);
