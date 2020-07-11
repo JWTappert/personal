@@ -26,10 +26,7 @@ export default function Skull(props) {
     const skull: THREE.Group = new THREE.Group();
     let head: THREE.Mesh;
     let jaw: THREE.Mesh;
-    const material = new THREE.MeshBasicMaterial({
-      color: theme.colors.primary,
-      wireframe: true,
-    });
+    const material = new THREE.MeshNormalMaterial({ flatShading: true });
 
     loader.load(
       "/models/skull.obj",
@@ -52,8 +49,7 @@ export default function Skull(props) {
       }
     );
 
-    camera.position.z = 10;
-    // scene.add(cube);
+    camera.position.z = 12;
     renderer.setSize(width, height);
 
     const renderScene = () => {

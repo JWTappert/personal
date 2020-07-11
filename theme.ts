@@ -1,6 +1,6 @@
 const shared = {
   colors: {
-    primary: "#35c3c1",
+    primary: "#88E6CA",
     secondary: "",
     tertiary: "",
   },
