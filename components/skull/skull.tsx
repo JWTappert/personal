@@ -7,6 +7,7 @@ export default function Skull(props) {
   const theme = useContext(ThemeContext);
   const mount = useRef(null);
   const [isAnimating, setAnimating] = useState(true);
+  const [selectedMaterial, SetSelectedMaterial] = useState("basic");
   const controls = useRef(null);
 
   useEffect(() => {
@@ -24,16 +25,55 @@ export default function Skull(props) {
     let geometrySkull: THREE.BufferGeometry;
     let geometrySkullJaw: THREE.BufferGeometry;
     const skull: THREE.Group = new THREE.Group();
+    const spotLight: THREE.SpotLight = new THREE.SpotLight(0xffffff);
+    spotLight.position.set(350, 350, 350);
     let head: THREE.Mesh;
     let jaw: THREE.Mesh;
-    const material = new THREE.MeshNormalMaterial({ flatShading: true });
+    let material: THREE.Material;
+
+    switch (selectedMaterial) {
+      case "basic":
+        material = new THREE.MeshBasicMaterial({
+          color: theme.colors.primary,
+          wireframe: true,
+        });
+        break;
+      case "normal":
+        material = new THREE.MeshNormalMaterial({ flatShading: true });
+        break;
+      case "lambert":
+        scene.add(spotLight);
+        material = new THREE.MeshLambertMaterial({
+          color: theme.colors.primary,
+        });
+        break;
+      case "phong":
+        scene.add(spotLight);
+        material = new THREE.MeshPhongMaterial({ color: theme.colors.primary });
+        break;
+      case "standard":
+        scene.add(spotLight);
+        material = new THREE.MeshStandardMaterial({
+          color: theme.colors.primary,
+        });
+        break;
+      case "physical":
+        scene.add(spotLight);
+        material = new THREE.MeshPhysicalMaterial({
+          color: theme.colors.primary,
+        });
+        break;
+      case "toon":
+        scene.add(spotLight);
+        material = new THREE.MeshToonMaterial({ color: theme.colors.primary });
+        break;
+    }
 
     loader.load(
       "/models/skull.obj",
       function (object: any) {
         geometrySkull = object.children[1].geometry;
         geometrySkullJaw = object.children[0].geometry;
-
         head = new THREE.Mesh(geometrySkull, material);
         jaw = new THREE.Mesh(geometrySkullJaw, material);
         skull.add(head);
@@ -44,8 +84,7 @@ export default function Skull(props) {
         console.log((xhr.loaded / xhr.total) * 100 + "% loaded");
       },
       function (error) {
-        console.log({ error });
-        console.log("An error happened");
+        console.error({ error });
       }
     );
 
@@ -100,7 +139,7 @@ export default function Skull(props) {
       geometrySkullJaw.dispose();
       material.dispose();
     };
-  }, []);
+  }, [selectedMaterial]);
 
   useEffect(() => {
     if (isAnimating) {
@@ -110,14 +149,44 @@ export default function Skull(props) {
     }
   }, [isAnimating]);
 
+  function handleMaterialSelected({ value }) {
+    if (!value) {
+      SetSelectedMaterial("normal");
+      return;
+    }
+    SetSelectedMaterial(value);
+  }
+
   return (
-    <Scene
-      className="vis"
-      ref={mount}
-      onClick={() => setAnimating(!isAnimating)}
-    />
+    <>
+      <Scene
+        className="vis"
+        ref={mount}
+        onClick={() => setAnimating(!isAnimating)}
+      />
+      <div>
+        <form>
+          <h4>Material</h4>
+          {materials.map((mat) => (
+            <div key={mat}>
+              <label>
+                <input
+                  type="radio"
+                  value={mat}
+                  checked={selectedMaterial === mat}
+                  onChange={({ target }) => handleMaterialSelected(target)}
+                />
+                {mat}
+              </label>
+            </div>
+          ))}
+        </form>
+      </div>
+    </>
   );
 }
+
+const materials = ["basic", "normal", "phong", "toon"];
 
 const Scene = styled.div`
   height: 100%;
