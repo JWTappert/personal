@@ -7,7 +7,9 @@ export default function Skull(props) {
   const theme = useContext(ThemeContext);
   const mount = useRef(null);
   const [isAnimating, setAnimating] = useState(true);
-  const [selectedMaterial, SetSelectedMaterial] = useState("basic");
+  const [selectedMaterial, setSelectedMaterial] = useState("basic");
+  const [rotateX, setRotateX] = useState(false);
+  const [rotateY, setRotateY] = useState(true);
   const controls = useRef(null);
 
   useEffect(() => {
@@ -41,31 +43,18 @@ export default function Skull(props) {
       case "normal":
         material = new THREE.MeshNormalMaterial({ flatShading: true });
         break;
-      case "lambert":
-        scene.add(spotLight);
-        material = new THREE.MeshLambertMaterial({
-          color: theme.colors.primary,
-        });
-        break;
       case "phong":
         scene.add(spotLight);
-        material = new THREE.MeshPhongMaterial({ color: theme.colors.primary });
-        break;
-      case "standard":
-        scene.add(spotLight);
-        material = new THREE.MeshStandardMaterial({
+        material = new THREE.MeshPhongMaterial({
           color: theme.colors.primary,
-        });
-        break;
-      case "physical":
-        scene.add(spotLight);
-        material = new THREE.MeshPhysicalMaterial({
-          color: theme.colors.primary,
+          shininess: 100,
         });
         break;
       case "toon":
         scene.add(spotLight);
-        material = new THREE.MeshToonMaterial({ color: theme.colors.primary });
+        material = new THREE.MeshToonMaterial({
+          color: theme.colors.primary,
+        });
         break;
     }
 
@@ -105,8 +94,8 @@ export default function Skull(props) {
     };
 
     const animate = () => {
-      // skull.rotation.x += 0.005;
-      skull.rotation.y += 0.005;
+      if (rotateX) skull.rotation.x += 0.005;
+      if (rotateY) skull.rotation.y += 0.005;
 
       renderScene();
       frameId = window.requestAnimationFrame(animate);
@@ -139,7 +128,7 @@ export default function Skull(props) {
       geometrySkullJaw.dispose();
       material.dispose();
     };
-  }, [selectedMaterial]);
+  }, [selectedMaterial, rotateX, rotateY]);
 
   useEffect(() => {
     if (isAnimating) {
@@ -151,10 +140,10 @@ export default function Skull(props) {
 
   function handleMaterialSelected({ value }) {
     if (!value) {
-      SetSelectedMaterial("normal");
+      setSelectedMaterial("normal");
       return;
     }
-    SetSelectedMaterial(value);
+    setSelectedMaterial(value);
   }
 
   return (
@@ -166,7 +155,26 @@ export default function Skull(props) {
       />
       <div>
         <form>
-          <h4>Material</h4>
+          <h3>Rotation</h3>
+          <div>
+            <label>
+              <input
+                type="checkbox"
+                checked={!!rotateX}
+                onChange={() => setRotateX(!rotateX)}
+              />
+              rotate x
+            </label>
+            <label>
+              <input
+                type="checkbox"
+                checked={!!rotateY}
+                onChange={() => setRotateY(!rotateY)}
+              />
+              rotate y
+            </label>
+          </div>
+          <h3>Material</h3>
           {materials.map((mat) => (
             <div key={mat}>
               <label>
