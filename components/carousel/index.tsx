@@ -1,156 +1,56 @@
-import React, { useState } from "react";
-import styled from "styled-components";
+import React from "react";
+import Link from "next/link";
+import { Layout, Carousel, Card, Descriptions, Image, Typography } from "antd";
 import moment from "moment";
 import markdownToHtml from "lib/markdownToHtml";
 
-export default function Carousel({ jobs }) {
-  const [currentIndex, setCurrentIndex] = useState(0);
-  const { company, description, website, start, end, position, logo } = jobs[
-    currentIndex
-  ];
-
-  function next() {
-    const next = (currentIndex + 1) % jobs.length;
-    setCurrentIndex(next);
-  }
-
-  function prev() {
-    let prev = (currentIndex - 1) % jobs.length;
-    if (prev < 0) prev = jobs.length - 1;
-    setCurrentIndex(prev);
-  }
+export default function CarouselWrapper({ jobs }) {
+  const { Paragraph } = Typography;
+  const upperGridStyle = { width: "50%", maxHeight: "400px" };
 
   return (
-    <Container>
-      <Button onClick={() => prev()}>
-        <span className="material-icons">keyboard_arrow_left</span>
-      </Button>
-      <ContentBody>
-        <Header>
-          <Title>
-            <h1>{company}</h1>
-            <small>
-              <a href={`https://${website}`}>{website}</a>
-            </small>
-            <PositionSection>
-              <h4>Title: {position}</h4>
-              <small>From: {moment(start).format("M/D/YY")}</small>
-              &nbsp;&nbsp;
-              <small>
-                Until: {!!end ? moment(end).format("M/D/YY") : "Now"}
-              </small>
-            </PositionSection>
-          </Title>
-          <Logo
-            src={logo?.url ? logo.url : "https://via.placeholder.com/150"}
-          />
-        </Header>
-        <Description>{description}</Description>
-      </ContentBody>
-      <Button onClick={() => next()}>
-        <span className="material-icons">keyboard_arrow_right</span>
-      </Button>
-    </Container>
+    <Layout style={{ background: "transparent" }}>
+      <Carousel autoplay adaptiveHeight dotPosition="right">
+        {jobs.map((job, index) => (
+          <div key={index}>
+            <Card style={{ background: "transparent" }}>
+              <Card.Grid style={upperGridStyle}>
+                <Descriptions title={job.company}>
+                  <Descriptions.Item>
+                    <Link href={`//${job.website}`}>{job.website}</Link>
+                  </Descriptions.Item>
+                </Descriptions>
+                <Descriptions title="Title">
+                  <Descriptions.Item>{job.position}</Descriptions.Item>
+                </Descriptions>
+                <Descriptions title="Dates">
+                  <Descriptions.Item label="From">
+                    {moment(job.start).format("M/D/YY")}
+                  </Descriptions.Item>
+                  <Descriptions.Item label="Until">
+                    {!!job.end ? moment(job.end).format("M/D/YY") : "Now"}
+                  </Descriptions.Item>
+                </Descriptions>
+              </Card.Grid>
+              <Card.Grid style={upperGridStyle}>
+                <Image
+                  style={{ maxWidth: "100%", maxHeight: "100%" }}
+                  src={
+                    job.logo?.url
+                      ? job.logo.url
+                      : "https://via.placeholder.com/150"
+                  }
+                />
+              </Card.Grid>
+              <Card.Grid
+                style={{ width: "100%", overflowY: "auto", maxHeight: "400px" }}
+              >
+                <Paragraph>{`${job.description}`}</Paragraph>
+              </Card.Grid>
+            </Card>
+          </div>
+        ))}
+      </Carousel>
+    </Layout>
   );
 }
-
-const Description = styled.div`
-  overflow-y: auto;
-
-  &::-webkit-scrollbar-track {
-    background-color: ${({ theme }) => theme.invertBody};
-  }
-
-  &::-webkit-scrollbar {
-    width: 3px;
-    background-color: ${({ theme }) => theme.invertBody};
-  }
-
-  &::-webkit-scrollbar-thumb {
-    background-color: ${({ theme }) => theme.body};
-  }
-`;
-
-const Logo = styled.img`
-  padding: 2em;
-  max-width: 150px;
-  height: auto;
-  margin: auto;
-
-  @media (max-width: 768px) {
-    display: none;
-  }
-`;
-
-const PositionSection = styled.div``;
-
-const Title = styled.div`
-  display: flex;
-  flex-direction: column;
-  padding: 2em;
-  max-width: 50%;
-
-  h1,
-  h4 {
-    margin-bottom: 0;
-  }
-  small {
-    margin-bottom: 0.83em;
-  }
-
-  @media (max-width: 768px) {
-    max-width: unset;
-  }
-`;
-
-const Header = styled.div`
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-
-  @media (max-width: 768px) {
-    flex-direction: column;
-  }
-`;
-
-const ContentBody = styled.div`
-  width: 100%;
-  height: 100%;
-  display: flex;
-  flex-direction: column;
-  padding: 2em;
-
-  @media (max-width: 768px) {
-    padding: 1em;
-  }
-`;
-
-const Button = styled.span`
-  color: ${({ theme }) => theme.colors.primary};
-  background-color: transparent;
-
-  &:hover {
-    color: ${({ theme }) => theme.invertText};
-    background-color: ${({ theme }) => theme.colors.primary};
-    border-radius: 50%;
-    cursor: pointer;
-  }
-
-  @media (max-width: 768px) {
-    padding: 0;
-  }
-`;
-
-const Container = styled.div`
-  // border: 1px solid gainsboro;
-  width: 100%;
-  height: 100vh;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  margin-bottom: 4em;
-
-  @media (max-width: 768px) {
-    height: 100vh;
-  }
-`;

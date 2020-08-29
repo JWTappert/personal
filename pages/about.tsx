@@ -1,18 +1,17 @@
 import React from "react";
-import { Page, Title, Body } from "components/layout";
+import { Page, Body } from "components/layout";
 import Carousel from "components/carousel";
 import { GetStaticProps } from "next";
 import { getJobs } from "lib/jobs";
+import { Layout, Typography } from "antd";
 
 export default function About({ jobs }) {
+  const { Title, Paragraph } = Typography;
   return (
     <Page>
-      <Title>
-        <h1>/tappert/about</h1>
-      </Title>
       <Body>
-        <h2>about me</h2>
-        <p>
+        <Title level={2}>about me</Title>
+        <Paragraph>
           My name is Justin and I am currently a software engineer living and
           working in Bend, Oregon. This site is mostly aimed at compiling all
           the experiments and musings from my life and professional career. I
@@ -24,12 +23,12 @@ export default function About({ jobs }) {
           wanted to do for the rest of my life. I switched majors and graduated
           a couple of years later. I have been writing code professionally for
           several years now and nothing has changed.
-        </p>
-        <p>
+        </Paragraph>
+        <Paragraph>
           I have always had an affinity for creating things, the only thing that
           has change is the medium.
-        </p>
-        <h2>work</h2>
+        </Paragraph>
+        <Title level={2}>work</Title>
         <Carousel jobs={jobs} />
       </Body>
     </Page>
