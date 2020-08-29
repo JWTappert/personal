@@ -8,34 +8,43 @@ export const GlobalStyles = createGlobalStyle`
   }
 
   body {
-    align-items: center;
-    background: ${({ theme }) => theme.body};
-    color: ${({ theme }) => theme.text};
-    font-weight: 100;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    height: 100%;
-    margin: 0;
-    padding: 0;
+    // background: ${({ theme }) => theme.body};
+    // color: ${({ theme }) => theme.text};
+    // font-weight: 100;
     font-family: BlinkMacSystemFont, -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-    transition: all 0.25s linear;
     letter-spacing: 0.2em;
   }
 
   a {
-    color: ${({ theme }) => theme.colors.primary};
-    text-decoration: none;
+    // color: ${({ theme }) => theme.colors.primary};
+    // text-decoration: none;
+    display: inline-block;
     font-size: 0.6em;
     text-transform: uppercase;
     letter-spacing: 0.5em;
+    transition: all 0.3s;
 
     &:hover {
-      text-decoration: underline;
+      transform: scale(1.2);
     }
   }
 
   &::-webkit-scrollbar-track {
     width: 3px;
+  }
+
+  .footer-icon {
+    svg {
+      font-size: 20px;
+      color: ${({ theme }) => theme.colors.link};
+      transition: all 0.3s;
+      transform-origin: 50% 50%;
+
+      &:hover {
+        cursor: pointer;
+        transform: scale(1.2);
+        color: ${({ theme }) => theme.colors.link};
+      }
+    }
   }
 `;

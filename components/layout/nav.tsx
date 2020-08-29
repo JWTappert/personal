@@ -1,52 +1,42 @@
 import React from "react";
 import Link from "next/link";
-import styled from "styled-components";
+import { Space, Switch } from "antd";
+import { BulbOutlined, BulbFilled } from "@ant-design/icons";
+
+const links = [
+  {
+    text: "index",
+    href: "/",
+  },
+  {
+    text: "about",
+    href: "/about",
+  },
+  {
+    text: "blog",
+    href: "/blog",
+  },
+];
 
 export default function Nav({ theme, toggleTheme }) {
-  const toggleText = theme === "light" ? "😈" : "😇";
-  const links = [
-    {
-      text: "index",
-      href: "/",
-    },
-    {
-      text: "about",
-      href: "/about",
-    },
-    {
-      text: "blog",
-      href: "/blog",
-    },
-  ];
-
   return (
-    <NavBar>
-      {links.map((link, index) => (
-        <Link key={index} href={link.href}>
-          <a>{link.text}</a>
-        </Link>
-      ))}
-      <Toggle onClick={toggleTheme}>{toggleText}</Toggle>
-    </NavBar>
+    <>
+      <Space size="large">
+        {links.map((link, index) => (
+          <Link key={index} href={link.href}>
+            <a>{link.text}</a>
+          </Link>
+        ))}
+      </Space>
+      <Space align="end">
+        <Switch
+          size="small"
+          defaultChecked
+          onChange={toggleTheme}
+          checkedChildren={<BulbOutlined />}
+          unCheckedChildren={<BulbFilled />}
+        />
+      </Space>
+    </>
   );
 }
-
-const Toggle = styled.a`
-  &:hover {
-    text-decoration: none;
-    cursor: pointer;
-  }
-`;
-const NavBar = styled.nav`
-  background-color: ${({ theme }) => theme.body};
-  width: 100%;
-  display: flex;
-  flex-shrink: 0;
-  align-items: center;
-  justify-content: space-around;
-  padding: 1em;
-
-  border-top: 1px solid ${({ theme }) => theme.colors.primary};
-  position: fixed;
-  bottom: 0;
-`;

@@ -1,12 +1,15 @@
 // import App from 'next/app'
 import React, { useEffect } from "react";
+import Router from "next/router";
 import Head from "next/head";
+import { ThemeProvider } from "styled-components";
+import "antd/dist/antd.css";
+import { Layout } from "antd";
+
 import { useDarkMode } from "lib/hooks/useDarkMode";
-import styled, { ThemeProvider } from "styled-components";
 import { GlobalStyles } from "global";
 import { lightTheme, darkTheme } from "theme";
-import Nav from "components/layout/nav";
-import Router from "next/router";
+import { Nav, Social } from "components/layout";
 import * as gtag from "lib/gtm";
 
 function MyApp(props) {
@@ -28,6 +31,8 @@ function MyApp(props) {
     return <div />;
   }
 
+  const { Header, Content, Footer } = Layout;
+
   return (
     <ThemeProvider theme={themeMode}>
       <Head>
@@ -42,25 +47,32 @@ function MyApp(props) {
         />
         {/* <link rel="icon" href="/favicon.ico" /> */}
       </Head>
-      <Container>
+      <Layout>
         <GlobalStyles />
-        <Component {...pageProps} />
-        <Nav theme={theme} toggleTheme={toggleTheme} />
-      </Container>
+        <Header
+          style={{
+            display: "flex",
+            justifyContent: "space-between",
+            background: "transparent",
+          }}
+        >
+          <Nav theme={theme} toggleTheme={toggleTheme} />
+        </Header>
+        <Content style={{ height: "90vh" }}>
+          <Component {...pageProps} />
+        </Content>
+        <Footer
+          style={{
+            display: "flex",
+            justifyContent: "center",
+          }}
+        >
+          <Social />
+        </Footer>
+      </Layout>
     </ThemeProvider>
   );
 }
-
-const Container = styled.div`
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  width: calc(100vw - 50px);
-  height: calc(100vh - 100px);
-  min-height: 100vh;
-  color: ${({ theme }) => theme.text};
-`;
 
 // Only uncomment this method if you have blocking data requirements for
 // every single page in your application. This disables the ability to

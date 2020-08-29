@@ -21,6 +21,7 @@ declare module "styled-components" {
     colors: {
       primary: string;
       secondary: string;
+      link: string;
     };
 
     card: {

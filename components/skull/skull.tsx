@@ -2,6 +2,7 @@ import { useRef, useEffect, useState, useContext } from "react";
 import * as THREE from "three";
 import { OBJLoader } from "node_modules/three/examples/jsm/loaders/OBJLoader";
 import styled, { ThemeContext } from "styled-components";
+import SceneSettings from "./scene-settings";
 
 export default function Skull(props) {
   const theme = useContext(ThemeContext);
@@ -138,7 +139,7 @@ export default function Skull(props) {
     }
   }, [isAnimating]);
 
-  function handleMaterialSelected({ value }) {
+  function handleMaterialSelected({ value }: any) {
     if (!value) {
       setSelectedMaterial("normal");
       return;
@@ -153,48 +154,24 @@ export default function Skull(props) {
         ref={mount}
         onClick={() => setAnimating(!isAnimating)}
       />
-      <div>
-        <form>
-          <h3>Rotation</h3>
-          <div>
-            <label>
-              <input
-                type="checkbox"
-                checked={!!rotateX}
-                onChange={() => setRotateX(!rotateX)}
-              />
-              rotate x
-            </label>
-            <label>
-              <input
-                type="checkbox"
-                checked={!!rotateY}
-                onChange={() => setRotateY(!rotateY)}
-              />
-              rotate y
-            </label>
-          </div>
-          <h3>Material</h3>
-          {materials.map((mat) => (
-            <div key={mat}>
-              <label>
-                <input
-                  type="radio"
-                  value={mat}
-                  checked={selectedMaterial === mat}
-                  onChange={({ target }) => handleMaterialSelected(target)}
-                />
-                {mat}
-              </label>
-            </div>
-          ))}
-        </form>
-      </div>
+      <Container>
+        <SceneSettings
+          rotateX={rotateX}
+          rotateY={rotateY}
+          selectedMaterial={selectedMaterial}
+          onRotateXSelected={setRotateX}
+          onRotateYSelected={setRotateY}
+          onMaterialSelected={handleMaterialSelected}
+        />
+      </Container>
     </>
   );
 }
 
-const materials = ["basic", "normal", "phong", "toon"];
+const Container = styled.div`
+  display: flex;
+  justify-content: center;
+`;
 
 const Scene = styled.div`
   height: 100%;

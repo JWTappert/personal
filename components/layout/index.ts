@@ -1,4 +1,5 @@
 import Nav from "./nav";
+import Social from "./social";
 import styled from "styled-components";
 
 const Page = styled.main`
@@ -28,4 +29,4 @@ const Body = styled.div`
   }
 `;
 
-export { Nav, Page, Title, Body };
+export { Nav, Social, Page, Title, Body };

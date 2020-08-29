@@ -1,8 +1,9 @@
 const shared = {
   colors: {
     primary: "#88E6CA",
-    secondary: "",
+    secondary: "#fff",
     tertiary: "",
+    link: "#1890ff",
   },
 };
 
