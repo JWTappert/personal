@@ -4,7 +4,8 @@ import { getPosts } from "lib/posts";
 import Head from "next/head";
 import markdownToHtml from "lib/markdownToHtml";
 import { PostTitle, PostHeader, PostBody } from "components/posts";
-import { Page, Title, Body } from "components/layout";
+import { Body } from "components/layout";
+import { Layout } from "antd";
 
 export default function Post({ post, morePosts, preview }) {
   const router = useRouter();
@@ -14,14 +15,11 @@ export default function Post({ post, morePosts, preview }) {
   return router.isFallback ? (
     <PostTitle>Loading…</PostTitle>
   ) : (
-    <Page>
+    <Layout>
       <Head>
         <title>{post.title}</title>
         {/* <meta property="og:image" content={post.ogImage.url} /> */}
       </Head>
-      <Title>
-        <h1>/tappert/blog/{post.slug}</h1>
-      </Title>
       <Body>
         <PostHeader
           title={post.title}
@@ -30,7 +28,7 @@ export default function Post({ post, morePosts, preview }) {
         />
         <PostBody content={post.content} />
       </Body>
-    </Page>
+    </Layout>
   );
 }
 

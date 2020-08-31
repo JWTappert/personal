@@ -7,6 +7,7 @@ import { getBlog } from "lib/posts";
 import { Body } from "components/layout";
 import { Layout } from "antd";
 import markdownToHtml from "lib/markdownToHtml";
+import { PostCard } from "components/posts";
 
 export default function Home(props) {
   const { content, posts } = props;
@@ -19,17 +20,18 @@ export default function Home(props) {
         <PostGrid>
           {posts &&
             posts.reverse().map((post) => (
-              <PostCard key={post.id}>
-                <Link as={`/blog/${post.slug}`} href="/blog/[slug]">
-                  <a className="hover:underline">{post.title}</a>
-                </Link>
-                <br />
-                <p>{post.excerpt}</p>
-                <small>
-                  Posted at: {moment(post.posted_at).format("M/DD")} at{" "}
-                  {moment(post.posted_at).format("HH:mm")}
-                </small>
-              </PostCard>
+              <PostCard post={post} />
+              // <PostCard key={post.id}>
+              //   <Link as={`/blog/${post.slug}`} href="/blog/[slug]">
+              //     <a className="hover:underline">{post.title}</a>
+              //   </Link>
+              //   <br />
+              //   <p>{post.excerpt}</p>
+              //   <small>
+              //     Posted at: {moment(post.posted_at).format("M/DD")} at{" "}
+              //     {moment(post.posted_at).format("HH:mm")}
+              //   </small>
+              // </PostCard>
             ))}
         </PostGrid>
       </Body>
@@ -48,11 +50,4 @@ export const getStaticProps: GetStaticProps = async (context) => {
 
 const PostGrid = styled.div`
   display: grid;
-`;
-
-const PostCard = styled.div`
-  border: 1px solid ${({ theme }) => theme.colors.primary};
-  border-radius: 10px;
-  padding: 1em;
-  margin-bottom: 1em;
 `;
