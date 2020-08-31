@@ -27,6 +27,10 @@ const Body = styled.div`
   p {
     line-height: 1.5em;
   }
+
+  @media (max-width: 768px) {
+    margin: 2em;
+  }
 `;
 
 export { Nav, Social, Page, Title, Body };

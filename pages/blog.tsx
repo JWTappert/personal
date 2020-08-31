@@ -4,17 +4,15 @@ import { GetStaticProps } from "next";
 import styled from "styled-components";
 import moment from "moment";
 import { getBlog } from "lib/posts";
-import { Page, Title, Body } from "components/layout";
+import { Body } from "components/layout";
+import { Layout } from "antd";
 import markdownToHtml from "lib/markdownToHtml";
 
 export default function Home(props) {
   const { content, posts } = props;
 
   return (
-    <Page>
-      <Title>
-        <h1>/tappert/blog</h1>
-      </Title>
+    <Layout>
       <Body>
         <h2>ramblings</h2>
         <div dangerouslySetInnerHTML={{ __html: content }} />
@@ -35,7 +33,7 @@ export default function Home(props) {
             ))}
         </PostGrid>
       </Body>
-    </Page>
+    </Layout>
   );
 }
 

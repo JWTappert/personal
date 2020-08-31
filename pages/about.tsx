@@ -4,6 +4,7 @@ import { GetStaticProps } from "next";
 import { getJobs } from "lib/jobs";
 import { Layout, Typography, Carousel } from "antd";
 import Job from "components/job";
+import markdownToHtml from "lib/markdownToHtml";
 
 export default function About({ jobs }) {
   const { Title, Paragraph } = Typography;
@@ -42,7 +43,15 @@ export default function About({ jobs }) {
 
 export const getStaticProps: GetStaticProps = async (context) => {
   const { Jobs } = await getJobs();
+  const jobsWithHtml = await Promise.all(
+    Jobs.map(async (job) => {
+      const descriptionHtml = await markdownToHtml(job.description);
+      return { ...job, descriptionHtml };
+    })
+  );
+
+  console.log({ jobsWithHtml });
   return {
-    props: { jobs: Jobs },
+    props: { jobs: jobsWithHtml },
   };
 };

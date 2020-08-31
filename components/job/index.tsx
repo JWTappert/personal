@@ -3,7 +3,15 @@ import styled from "styled-components";
 import moment from "moment";
 
 export default function Job({ job }) {
-  const { company, description, website, start, end, position, logo } = job;
+  const {
+    company,
+    descriptionHtml: description,
+    website,
+    start,
+    end,
+    position,
+    logo,
+  } = job;
 
   return (
     <Container>
@@ -27,7 +35,7 @@ export default function Job({ job }) {
             src={logo?.url ? logo.url : "https://via.placeholder.com/150"}
           />
         </Header>
-        <Description>{description}</Description>
+        <Description dangerouslySetInnerHTML={{ __html: description }} />
       </ContentBody>
     </Container>
   );
