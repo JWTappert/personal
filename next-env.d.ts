@@ -46,7 +46,7 @@ export interface Post {
   content: string;
   type: PostType;
   hero: Media;
-  posted_at: string;
+  created_at: string;
 }
 
 export enum PostType {

@@ -1,6 +1,6 @@
 const shared = {
   colors: {
-    primary: "#88E6CA",
+    primary: "#1890ff",
     secondary: "#fff",
     tertiary: "",
     link: "#1890ff",
@@ -9,7 +9,7 @@ const shared = {
 
 export const lightTheme = {
   ...shared,
-  body: "#E2E2E2",
+  body: "#FFF",
   invertBody: "#363537",
   text: "#363537",
   invertText: "#FAFAFA",

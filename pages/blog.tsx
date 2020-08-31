@@ -6,6 +6,7 @@ import { Body } from "components/layout";
 import { Layout, Typography } from "antd";
 import markdownToHtml from "lib/markdownToHtml";
 import { PostCard } from "components/posts";
+import moment from "moment";
 
 export default function Home(props) {
   const { content, posts } = props;
@@ -18,7 +19,7 @@ export default function Home(props) {
         <div dangerouslySetInnerHTML={{ __html: content }} />
         <Title level={3}>posts</Title>
         <PostGrid>
-          {posts && posts.reverse().map((post) => <PostCard post={post} />)}
+          {posts && posts.map((post) => <PostCard key={post.id} post={post} />)}
         </PostGrid>
       </Body>
     </Layout>
@@ -28,9 +29,11 @@ export default function Home(props) {
 export const getStaticProps: GetStaticProps = async (context) => {
   const blog = await getBlog();
   const descriptionHtml = await markdownToHtml(blog.description || "");
-  const posts = blog.posts || [];
+  const posts = blog.posts.sort((a, b) =>
+    moment.utc(a.created_at).diff(moment.utc(b.created_at))
+  );
   return {
-    props: { content: descriptionHtml, posts },
+    props: { content: descriptionHtml, posts: posts || [] },
   };
 };
 

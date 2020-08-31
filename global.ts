@@ -8,16 +8,19 @@ export const GlobalStyles = createGlobalStyle`
   }
 
   body {
-    // background: ${({ theme }) => theme.body};
-    // color: ${({ theme }) => theme.text};
-    // font-weight: 100;
     font-family: BlinkMacSystemFont, -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
     letter-spacing: 0.2em;
   }
 
+  .ant-layout, .ant-layout-footer {
+    background: ${({ theme }) => theme.body} !important;
+  }
+
+  .ant-typography, h1, h2, h3, h4, h5, p, small {
+    color: ${({ theme }) => theme.text} !important;
+  }
+
   a {
-    // color: ${({ theme }) => theme.colors.primary};
-    // text-decoration: none;
     display: inline-block;
     font-size: 0.6em;
     text-transform: uppercase;

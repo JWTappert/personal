@@ -19,6 +19,7 @@ const links = [
 ];
 
 export default function Nav({ theme, toggleTheme }) {
+  console.log({ theme });
   return (
     <>
       <Space size="large">
@@ -33,8 +34,8 @@ export default function Nav({ theme, toggleTheme }) {
           size="small"
           defaultChecked
           onChange={toggleTheme}
-          checkedChildren={<BulbOutlined />}
-          unCheckedChildren={<BulbFilled />}
+          checkedChildren={<BulbFilled />}
+          unCheckedChildren={<BulbOutlined />}
         />
       </Space>
     </>
