@@ -1,38 +1,24 @@
 import React from "react";
-import Link from "next/link";
 import { GetStaticProps } from "next";
 import styled from "styled-components";
-import moment from "moment";
 import { getBlog } from "lib/posts";
 import { Body } from "components/layout";
-import { Layout } from "antd";
+import { Layout, Typography } from "antd";
 import markdownToHtml from "lib/markdownToHtml";
 import { PostCard } from "components/posts";
 
 export default function Home(props) {
   const { content, posts } = props;
+  const { Title } = Typography;
 
   return (
     <Layout>
       <Body>
-        <h2>ramblings</h2>
+        <Title level={2}>ramblings</Title>
         <div dangerouslySetInnerHTML={{ __html: content }} />
+        <Title level={3}>posts</Title>
         <PostGrid>
-          {posts &&
-            posts.reverse().map((post) => (
-              <PostCard post={post} />
-              // <PostCard key={post.id}>
-              //   <Link as={`/blog/${post.slug}`} href="/blog/[slug]">
-              //     <a className="hover:underline">{post.title}</a>
-              //   </Link>
-              //   <br />
-              //   <p>{post.excerpt}</p>
-              //   <small>
-              //     Posted at: {moment(post.posted_at).format("M/DD")} at{" "}
-              //     {moment(post.posted_at).format("HH:mm")}
-              //   </small>
-              // </PostCard>
-            ))}
+          {posts && posts.reverse().map((post) => <PostCard post={post} />)}
         </PostGrid>
       </Body>
     </Layout>

@@ -9,7 +9,7 @@ export default function PostCard({ post }) {
   return (
     <Card
       hoverable
-      style={{ width: "100%" }}
+      style={{ width: "100%", marginBottom: "1em" }}
       onClick={() => router.push(`/blog/${slug}`)}
     >
       <Meta
