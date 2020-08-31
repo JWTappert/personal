@@ -1,14 +1,15 @@
 import React from "react";
-import { Page, Body } from "components/layout";
-import Carousel from "components/carousel";
+import { Body } from "components/layout";
 import { GetStaticProps } from "next";
 import { getJobs } from "lib/jobs";
-import { Layout, Typography } from "antd";
+import { Layout, Typography, Carousel } from "antd";
+import Job from "components/job";
 
 export default function About({ jobs }) {
   const { Title, Paragraph } = Typography;
+
   return (
-    <Page>
+    <Layout style={{ height: "100%" }}>
       <Body>
         <Title level={2}>about me</Title>
         <Paragraph>
@@ -29,9 +30,13 @@ export default function About({ jobs }) {
           has change is the medium.
         </Paragraph>
         <Title level={2}>work</Title>
-        <Carousel jobs={jobs} />
+        <Carousel adaptiveHeight dotPosition="right">
+          {jobs.map((job, i) => (
+            <Job key={i} job={job} />
+          ))}
+        </Carousel>
       </Body>
-    </Page>
+    </Layout>
   );
 }
 
