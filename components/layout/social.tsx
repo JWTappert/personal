@@ -1,5 +1,4 @@
 import React from "react";
-import Link from "next/link";
 import { Space } from "antd";
 import {
   GithubOutlined,
@@ -11,18 +10,18 @@ import {
 export default function Social({ theme, toggleTheme }) {
   return (
     <Space size="large">
-      <Link href="//github.com/jwtappert">
+      <a href="https://github.com/JWTappert">
         <GithubOutlined className="footer-icon" />
-      </Link>
-      <Link href="//twitter.com/tappertwj">
+      </a>
+      <a href="https://twitter.com/tappertwj">
         <TwitterOutlined className="footer-icon" />
-      </Link>
-      <Link href="//linkedin.com/in/tappertj">
+      </a>
+      <a href="https://linkedin.com/in/tappertj">
         <LinkedinFilled className="footer-icon" />
-      </Link>
-      <Link href="//mailto:tappertwj@gmail.com">
+      </a>
+      <a href="mailto:tappertwj@gmail.com">
         <MailOutlined className="footer-icon" />
-      </Link>
+      </a>
     </Space>
   );
 }
