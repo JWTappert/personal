@@ -25,11 +25,11 @@ export default function SceneSettings({
   const [showModal, setShowModal] = useState(false);
   return (
     <>
-      <Button
+      <ThemedButton
         size="large"
         icon={<SettingOutlined />}
         onClick={() => setShowModal(true)}
-      ></Button>
+      ></ThemedButton>
       <ThemedModal
         title="Scene Settings"
         visible={showModal}
@@ -86,6 +86,11 @@ export default function SceneSettings({
     </>
   );
 }
+
+const ThemedButton = styled(Button)`
+  background: ${({ theme }) => theme.body} !important;
+  color: ${({ theme }) => theme.text} !important;
+`;
 
 const ThemedModal = styled(Modal)`
   & .ant-modal-header {
