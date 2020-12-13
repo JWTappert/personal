@@ -10,6 +10,7 @@ import {
 } from "antd";
 import { SettingOutlined } from "@ant-design/icons";
 import Link from "next/link";
+import styled from "styled-components";
 
 export default function SceneSettings({
   rotateX,
@@ -20,7 +21,7 @@ export default function SceneSettings({
   onMaterialSelected,
 }) {
   const materials = ["basic", "normal", "phong", "toon"];
-  const { Title, Paragraph, Text } = Typography;
+  const { Title, Paragraph } = Typography;
   const [showModal, setShowModal] = useState(false);
   return (
     <>
@@ -29,7 +30,7 @@ export default function SceneSettings({
         icon={<SettingOutlined />}
         onClick={() => setShowModal(true)}
       ></Button>
-      <Modal
+      <ThemedModal
         title="Scene Settings"
         visible={showModal}
         centered
@@ -81,7 +82,31 @@ export default function SceneSettings({
             </Radio.Group>
           </Form.Item>
         </Form>
-      </Modal>
+      </ThemedModal>
     </>
   );
 }
+
+const ThemedModal = styled(Modal)`
+  & .ant-modal-header {
+    background: ${({ theme }) => theme.body} !important;
+    border-bottom: ${({ theme }) => theme.toggleBorder} !important;
+    
+    > .ant-modal-title {
+      color: ${({ theme }) => theme.text} !important;
+    }
+  }
+  & .ant-modal-close {
+    color: ${({ theme }) => theme.text} !important;
+  }
+  > .ant-modal-content {
+    background-color: ${({ theme }) => theme.body} !important; 
+    
+    & .ant-checkbox + span, span.ant-radio + * {
+      color: ${({ theme }) => theme.text} !important;
+    }
+  }
+  & .ant-modal-footer {
+    border-top: ${({ theme }) => theme.toggleBorder} !important;
+  }
+`
