@@ -90,6 +90,10 @@ export default function SceneSettings({
 const ThemedButton = styled(Button)`
   background: ${({ theme }) => theme.body} !important;
   color: ${({ theme }) => theme.text} !important;
+  
+  &:hover {
+    color: ${({ theme }) => theme.colors.link} !important;
+  }
 `;
 
 const ThemedModal = styled(Modal)`
