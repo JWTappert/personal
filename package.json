@@ -16,7 +16,7 @@
     "gray-matter": "^4.0.2",
     "hasura": "^2.0.1",
     "jsonwebtoken": "^8.5.1",
-    "moment": "^2.26.0",
+    "moment": "^2.29.4",
     "next": "9.4.1",
     "node-fetch": "^2.6.0",
     "react": "16.13.1",
