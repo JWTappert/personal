@@ -1,3 +1,5 @@
+import { DefaultTheme } from "styled-components";
+
 const shared = {
   colors: {
     primary: "#1890ff",
@@ -7,7 +9,7 @@ const shared = {
   },
 };
 
-export const lightTheme = {
+export const lightTheme: DefaultTheme = {
   ...shared,
   body: "#FFF",
   invertBody: "#363537",
@@ -18,7 +20,7 @@ export const lightTheme = {
   inputFill: "#fff",
 };
 
-export const darkTheme = {
+export const darkTheme: DefaultTheme = {
   ...shared,
   body: "#363537",
   invertBody: "#FFF",
