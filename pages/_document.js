@@ -1,5 +1,5 @@
 import { Fragment } from "react";
-import Document, { Head, Main, NextScript } from "next/document";
+import Document, { Html, Head, Main, NextScript } from "next/document";
 import { ServerStyleSheet } from "styled-components";
 
 export default class MyDocument extends Document {
@@ -35,7 +35,7 @@ export default class MyDocument extends Document {
     const { isProd } = this.props;
 
     return (
-      <html lang="en">
+      <Html>
         <Head>
           {isProd && (
             <Fragment>
@@ -63,7 +63,7 @@ export default class MyDocument extends Document {
           <Main />
           <NextScript />
         </body>
-      </html>
+      </Html>
     );
   }
 }

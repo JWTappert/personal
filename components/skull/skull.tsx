@@ -1,11 +1,11 @@
 import { useRef, useEffect, useState, useContext } from "react";
 import * as THREE from "three";
 import { OBJLoader } from "node_modules/three/examples/jsm/loaders/OBJLoader";
-import styled, { ThemeContext } from "styled-components";
+import styled, { useTheme } from "styled-components";
 import SceneSettings from "./scene-settings";
 
 export default function Skull(props) {
-  const theme = useContext(ThemeContext);
+  const theme = useTheme();
   const mount = useRef(null);
   const [isAnimating, setAnimating] = useState(true);
   const [selectedMaterial, setSelectedMaterial] = useState("basic");

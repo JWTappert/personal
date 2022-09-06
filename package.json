@@ -9,10 +9,13 @@
   },
   "dependencies": {
     "@ant-design/icons": "^4.7.0",
+    "@apollo/client": "^3.6.9",
+    "@contentful/rich-text-html-renderer": "^15.13.1",
     "antd": "^4.22.8",
     "bcrypt": "^5.0.1",
     "cookie": "^0.5.0",
     "date-fns": "^2.29.2",
+    "graphql": "^16.6.0",
     "gray-matter": "^4.0.3",
     "hasura": "^2.0.1",
     "jsonwebtoken": "^8.5.1",
