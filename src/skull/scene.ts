@@ -53,7 +53,7 @@ export async function createScene(canvas: HTMLCanvasElement): Promise<SceneHandl
         skull.add(mesh);
       }
     }
-    skull.scale.setScalar(0.1);
+    skull.scale.setScalar(0.6);
   } catch (err) {
     console.warn('[scene] OBJ load failed, using icosahedron fallback', err);
     const geo = new THREE.IcosahedronGeometry(4, 1);
