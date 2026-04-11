@@ -3,6 +3,7 @@ import { createSkullMaterial } from './material';
 import { createComposer, type GlitchInstance } from './postfx';
 import { createInteractions } from './interactions';
 import { createIdleBehavior } from './idle';
+import { createSkullMotion } from './skullMotion';
 
 // Neon palette for click color flash
 const CLICK_COLORS: number[] = [
@@ -111,7 +112,8 @@ async function boot() {
   const composer = createComposer(scene);
 
   const bus = createInteractions(canvas, scene);
-  const idle = createIdleBehavior(bus);
+  const skullMotion = createSkullMotion(scene);
+  const idle = createIdleBehavior(bus, skullMotion);
 
   // Click state
   let ringEffect = 0;               // expanding shader ring
@@ -177,31 +179,32 @@ async function boot() {
     uniforms.uTime.value = t;
 
     idle.tick(dt);
-    uniforms.uDecayLevel.value = idle.getDecayLevel();
 
-    // Lazy eye tracking: the skull drifts toward facing the cursor over
-    // ~2.8 seconds. A slow sine wobble adds a "distracted" feel so it never
-    // perfectly centers even when the cursor holds still.
+    // Lazy eye tracking: cursor driver feeds skullMotion with a target based
+    // on cursor position plus a slow wobble. When the cursor is idle, the
+    // idle scheduler (inside idle.tick) is driving skullMotion instead.
     const cursorState = bus.getCursor();
     uniforms.uCursor.value.set(cursorState.x, cursorState.y);
-    const wobbleX = Math.sin(t * 0.23) * 0.14;
-    const wobbleY = Math.cos(t * 0.19) * 0.07;
-    const targetYaw = cursorState.x * 0.7 + wobbleX;
-    const targetPitch = -cursorState.y * 0.3 + wobbleY;
-    const tau = 2.8;
-    const rate = 1 - Math.exp(-dt / tau);
-    scene.skull.rotation.y += (targetYaw - scene.skull.rotation.y) * rate;
-    scene.skull.rotation.x += (targetPitch - scene.skull.rotation.x) * rate;
+    if (!idle.isActive()) {
+      const wobbleX = Math.sin(t * 0.23) * 0.14;
+      const wobbleY = Math.cos(t * 0.19) * 0.07;
+      const targetYaw = cursorState.x * 0.7 + wobbleX;
+      const targetPitch = -cursorState.y * 0.3 + wobbleY;
+      skullMotion.lookAt(targetYaw, targetPitch);
+    }
+    skullMotion.tick(dt);
     scene.skull.position.x = cursorState.x * 0.15;
 
     // Scroll drives the jaw hinge directly. Max ~32 degrees open at full scroll.
+    // The idle scheduler adds a transient "talk" offset via skullMotion.
     const scroll = bus.getScroll();
     // Jaw click bonus decays over ~0.6s
     jawClickBonus = Math.max(0, jawClickBonus - dt / 0.6);
     if (scene.jawPivot) {
       const scrollAngle = scroll * 0.55;
       const bonusAngle = jawClickBonus * 0.25;
-      scene.jawPivot.rotation.x = Math.min(0.8, scrollAngle + bonusAngle);
+      const talkOffset = skullMotion.getJawOffset();
+      scene.jawPivot.rotation.x = Math.min(0.8, scrollAngle + bonusAngle + talkOffset);
     }
 
     // Ring effect decay (~1s) — expanding bright ring from the click point
