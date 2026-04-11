@@ -9,8 +9,11 @@ export interface SceneHandle {
   jaw: THREE.Mesh | null;
   /** Head submesh — null if the OBJ didn't contain one. */
   head: THREE.Mesh | null;
-  /** Original local-space position of the jaw, for animated returns. */
-  jawRestPosition: THREE.Vector3;
+  /**
+   * Pivot group wrapping the jaw, positioned at the jaw's hinge point.
+   * Rotate its .rotation.x to hinge the jaw open/closed. Null if no jaw.
+   */
+  jawPivot: THREE.Group | null;
   camera: THREE.PerspectiveCamera;
   scene: THREE.Scene;
   renderer: THREE.WebGLRenderer;
@@ -43,6 +46,7 @@ export async function createScene(canvas: HTMLCanvasElement): Promise<SceneHandl
 
   let jaw: THREE.Mesh | null = null;
   let head: THREE.Mesh | null = null;
+  let jawPivot: THREE.Group | null = null;
 
   // Fallback material used until the real shader material lands.
   let currentMaterial: THREE.Material = new THREE.MeshBasicMaterial({
@@ -81,6 +85,27 @@ export async function createScene(canvas: HTMLCanvasElement): Promise<SceneHandl
       skull.add(mesh);
     }
     skull.scale.setScalar(0.6);
+
+    // Wrap the jaw in a pivot Group at the hinge point so rotation hinges
+    // correctly. Hinge is the top-rear of the jaw's bounding box.
+    if (jaw) {
+      jaw.geometry.computeBoundingBox();
+      const bbox = jaw.geometry.boundingBox!;
+      // Top-rear of jaw, centered left-right. Front is +Z convention.
+      const hinge = new THREE.Vector3(
+        (bbox.min.x + bbox.max.x) * 0.5,
+        bbox.max.y,
+        bbox.min.z
+      );
+      jawPivot = new THREE.Group();
+      jawPivot.position.copy(hinge);
+      skull.add(jawPivot);
+      // Move the jaw from the skull group into the pivot, offsetting its
+      // local position so its world position is unchanged.
+      skull.remove(jaw);
+      jaw.position.sub(hinge);
+      jawPivot.add(jaw);
+    }
   } catch (err) {
     console.warn('[scene] OBJ load failed, using icosahedron fallback', err);
     const geo = new THREE.IcosahedronGeometry(4, 1);
@@ -89,8 +114,6 @@ export async function createScene(canvas: HTMLCanvasElement): Promise<SceneHandl
     head = mesh;
     skull.add(mesh);
   }
-
-  const jawRestPosition = jaw ? jaw.position.clone() : new THREE.Vector3();
 
   const clock = new THREE.Clock();
 
@@ -101,7 +124,7 @@ export async function createScene(canvas: HTMLCanvasElement): Promise<SceneHandl
     skull,
     jaw,
     head,
-    jawRestPosition,
+    jawPivot,
     render() {
       renderer.render(scene, camera);
     },

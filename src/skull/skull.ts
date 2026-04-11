@@ -179,10 +179,11 @@ async function boot() {
     uniforms.uRingEffect.value = ringEffect;
     uniforms.uClickPoint.value.set(clickPoint.x, clickPoint.y, clickPoint.z);
 
-    // Jaw drop decay (~0.8s) — independent jaw mesh translation
+    // Jaw drop decay (~0.8s) — rotate around hinge pivot like a real jaw
     jawDrop = Math.max(0, jawDrop - dt / 0.8);
-    if (scene.jaw) {
-      scene.jaw.position.y = scene.jawRestPosition.y - 0.6 * jawDrop;
+    if (scene.jawPivot) {
+      // ~23 degrees of opening at peak
+      scene.jawPivot.rotation.x = jawDrop * 0.4;
     }
 
     composer.setSlot(0, ambientBurst.tick(dt));
