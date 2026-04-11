@@ -68,6 +68,24 @@
         border-top: 1px solid rgb(var(--hud-rgb) / 0.25);
         justify-content: flex-end;
       }
+      #hint-flash {
+        position: fixed;
+        top: 50%; left: 50%;
+        transform: translate(-50%, -50%);
+        font-size: 44px;
+        letter-spacing: 0.3em;
+        color: rgb(var(--hud-rgb));
+        text-shadow: 0 0 14px rgb(var(--hud-rgb)),
+                     0 0 30px rgb(var(--hud-rgb));
+        opacity: 0;
+        pointer-events: none;
+        mix-blend-mode: screen;
+      }
+      #hint-flash.flash { animation: hint-flash 120ms linear; }
+      @keyframes hint-flash {
+        0%, 100% { opacity: 0; }
+        50% { opacity: 0.9; }
+      }
     </style>
   </head>
   <body>
@@ -81,6 +99,7 @@
       <div class="hud-bar hud-bottom">
         <a href="mailto:oriole-quod0p@icloud.com">email</a>
       </div>
+      <div id="hint-flash"></div>
     </div>
     <script>
       import '../skull/skull.ts';

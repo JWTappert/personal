@@ -15,6 +15,7 @@ export interface PuzzleLinesProvider {
 export interface HudHandle {
   tick(t: number): void;
   setUnlocked(flag: boolean): void;
+  flashHint(text: string): void;
 }
 
 export function createHud(
@@ -28,6 +29,7 @@ export function createHud(
     bl: root.querySelector('.hud-bl')!,
     br: root.querySelector('.hud-br')!,
   };
+  const flashEl = document.getElementById('hint-flash')!;
 
   let unlocked = false;
 
@@ -48,6 +50,14 @@ export function createHud(
       if (flag) {
         corners.br.textContent = 'well played.';
       }
+    },
+    flashHint(text: string) {
+      if (unlocked) return;
+      flashEl.textContent = text;
+      // Remove + force reflow + re-add so the animation restarts on every call
+      flashEl.classList.remove('flash');
+      void flashEl.offsetWidth;
+      flashEl.classList.add('flash');
     },
   };
 }

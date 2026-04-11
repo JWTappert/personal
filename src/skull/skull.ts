@@ -247,6 +247,9 @@ async function boot() {
       idleGlitchInst.regionCenter = 0.2 + Math.random() * 0.6;
       idleGlitchInst.regionHeight = 0.08 + Math.random() * 0.32;
       idleGlitchInst.jitter = Math.random();
+      if (!puzzle.isUnlocked()) {
+        hud.flashHint(puzzle.getGlitchHint());
+      }
     }
     idleGlitchInst.intensity = idleBurst;
     prevIdleBurst = idleBurst;
