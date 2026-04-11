@@ -62,10 +62,8 @@ class BurstSlot {
     this.inst.regionCenter = 0.2 + Math.random() * 0.6;
     this.inst.regionHeight = 0.08 + Math.random() * 0.32;
     this.inst.jitter = Math.random();
-    // ~85% quick flashes (120-250ms), ~15% linger (400-700ms)
-    this.lifetime = Math.random() < 0.15
-      ? 0.4 + Math.random() * 0.3
-      : 0.12 + Math.random() * 0.13;
+    // Quick flashes only: 100-220ms total lifetime
+    this.lifetime = 0.1 + Math.random() * 0.12;
     // ~12% chance of a cluster follow-up
     const cluster = Math.random() < 0.12;
     this.nextIn = cluster
