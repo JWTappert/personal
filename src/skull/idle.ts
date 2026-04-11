@@ -35,6 +35,8 @@ export function createIdleBehavior(
   let pulseDuration = 0;
   let pulseAge = 0;
   let pulseAmp = 0;
+  /** Envelope shape exponent. ~0.55 = pointed accent, ~1.0 = round bell. */
+  let pulseShape = 1;
 
   const reset = () => {
     idleness = 0;
@@ -51,16 +53,49 @@ export function createIdleBehavior(
   }
 
   function startPhrase() {
-    pulsesRemaining = 3 + Math.floor(Math.random() * 5); // 3..7
-    talkPhase = 'pulse';
+    // Mixed phrase lengths: mostly "sentences" (3-7), with short
+    // interjections ("hmm", 1-2) and occasional ramblings (8-12).
+    const r = Math.random();
+    if (r < 0.15) {
+      pulsesRemaining = 1 + Math.floor(Math.random() * 2);  // 1..2
+    } else if (r < 0.9) {
+      pulsesRemaining = 3 + Math.floor(Math.random() * 5);  // 3..7
+    } else {
+      pulsesRemaining = 8 + Math.floor(Math.random() * 5);  // 8..12
+    }
     beginPulse();
   }
 
   function beginPulse() {
-    pulseDuration = 0.14 + Math.random() * 0.12; // 140..260ms
-    pulseAmp = 0.08 + Math.random() * 0.2;       // 0.08..0.28 rad
+    // ~20% of pulses are "stressed" — bigger and slower (accented syllables).
+    // The rest are normal syllables with a wide dynamic range.
+    const stressed = Math.random() < 0.2;
+    if (stressed) {
+      pulseAmp = 0.22 + Math.random() * 0.22;       // 0.22..0.44 rad
+      pulseDuration = 0.22 + Math.random() * 0.2;   // 220..420ms
+    } else {
+      pulseAmp = 0.03 + Math.random() * 0.18;       // 0.03..0.21 rad
+      pulseDuration = 0.09 + Math.random() * 0.18;  // 90..270ms
+    }
+    // Shape varies from pointed (0.55) to rounded (1.0), so pulses don't all
+    // have the same envelope character.
+    pulseShape = 0.55 + Math.random() * 0.45;
     pulseAge = 0;
     talkPhase = 'pulse';
+  }
+
+  function scheduleNextRest() {
+    // 70% tight (syllables running together), 25% comma-length,
+    // 5% hesitation pause (thinking mid-sentence).
+    const r = Math.random();
+    if (r < 0.7) {
+      talkTimer = 0.03 + Math.random() * 0.08;  // 30..110ms
+    } else if (r < 0.95) {
+      talkTimer = 0.15 + Math.random() * 0.15;  // 150..300ms
+    } else {
+      talkTimer = 0.35 + Math.random() * 0.3;   // 350..650ms
+    }
+    talkPhase = 'rest';
   }
 
   function scheduleNextPhrase() {
@@ -108,13 +143,14 @@ export function createIdleBehavior(
               scheduleNextPhrase();
               skullMotion.setJawOffset(0);
             } else {
-              talkPhase = 'rest';
-              talkTimer = 0.04 + Math.random() * 0.08; // 40..120ms between pulses
+              scheduleNextRest();
               skullMotion.setJawOffset(0);
             }
           } else {
-            // Half-sine envelope: 0 -> peak -> 0 over the pulse duration
-            const value = pulseAmp * Math.sin((Math.PI * pulseAge) / pulseDuration);
+            // Shaped half-sine envelope: sin ramps 0->1->0, then raised to
+            // pulseShape to vary the peak character (pointed vs round).
+            const phase = Math.sin((Math.PI * pulseAge) / pulseDuration);
+            const value = pulseAmp * Math.pow(phase, pulseShape);
             skullMotion.setJawOffset(value);
           }
         } else if (talkPhase === 'rest') {
