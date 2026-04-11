@@ -10,6 +10,7 @@ export interface ComposerHandle {
   render(): void;
   resize(): void;
   setGlitch(variant: 0 | 1 | 2, intensity: number): void;
+  setRegion(center: number, height: number, jitter: number): void;
   setUnlocked(flag: boolean): void;
 }
 
@@ -44,6 +45,9 @@ export function createComposer(scene: SceneHandle): ComposerHandle {
       uResolution: {
         value: new THREE.Vector2(window.innerWidth, window.innerHeight),
       },
+      uRegionCenter: { value: 0.5 },
+      uRegionHeight: { value: 1.0 },
+      uJitter: { value: 0 },
     },
     vertexShader: glitchVertSrc,
     fragmentShader: glitchFragSrc,
@@ -69,6 +73,11 @@ export function createComposer(scene: SceneHandle): ComposerHandle {
       glitchPass.uniforms.uVariant.value = variant;
       // When unlocked, suppress glitch entirely
       glitchPass.uniforms.uIntensity.value = unlocked ? 0 : intensity;
+    },
+    setRegion(center, height, jitter) {
+      glitchPass.uniforms.uRegionCenter.value = center;
+      glitchPass.uniforms.uRegionHeight.value = height;
+      glitchPass.uniforms.uJitter.value = jitter;
     },
     setUnlocked(flag) {
       unlocked = flag;

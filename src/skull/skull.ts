@@ -18,9 +18,26 @@ async function boot() {
   const composer = createComposer(scene);
 
   // Temporary burst-based glitch scheduler — replaced by idle.ts in Phase 5.
-  // Most of the time intensity is near zero; occasional short bursts spike it.
+  // Bursts are short random spikes with randomized spatial region so each one
+  // affects a different part of the screen.
   let burstIntensity = 0;
-  let nextBurstIn = 4 + Math.random() * 6;
+  let nextBurstIn = 2 + Math.random() * 5;
+  let decayRate = 0.02;
+
+  function triggerBurst() {
+    burstIntensity = 0.5 + Math.random() * 0.5;
+    // Random vertical band: center anywhere, height varies from tight (~15%)
+    // to wide (~70%). Tighter bands bias toward the skull's visible area.
+    const center = 0.2 + Math.random() * 0.6;
+    const height = 0.08 + Math.random() * 0.32;
+    const jitter = Math.random();
+    composer.setRegion(center, height, jitter);
+    // Decay rate randomized: some bursts are micro-flashes, some linger
+    decayRate = Math.random() < 0.3 ? 0.0005 : 0.02;
+    // Next burst timing: mostly 3-10s apart, occasionally a cluster follow-up
+    const cluster = Math.random() < 0.25;
+    nextBurstIn = cluster ? 0.08 + Math.random() * 0.35 : 3 + Math.random() * 7;
+  }
 
   let lastFrame = performance.now();
   function frame(now: number) {
@@ -32,11 +49,9 @@ async function boot() {
 
     nextBurstIn -= dt;
     if (nextBurstIn <= 0) {
-      burstIntensity = 0.55 + Math.random() * 0.35;
-      nextBurstIn = 4 + Math.random() * 8;
+      triggerBurst();
     }
-    // Exponential-ish decay: ~300–400ms to near-zero after a spike
-    burstIntensity *= Math.pow(0.02, dt);
+    burstIntensity *= Math.pow(decayRate, dt);
 
     composer.setGlitch(glitchVariant, burstIntensity);
 
