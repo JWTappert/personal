@@ -69,42 +69,6 @@ class BurstSlot {
   }
 }
 
-/**
- * Slow-drifting ambient layer: always on at low intensity, variant rotates
- * every 6-12 seconds, full-screen coverage. Adds the "signal noise" feel.
- */
-class AmbientSlot {
-  private variantSwapIn: number;
-  private jitterDrift = 0;
-  private currentVariant: Variant = randVariant();
-  private inst: GlitchInstance;
-
-  constructor() {
-    this.variantSwapIn = 6 + Math.random() * 6;
-    this.inst = {
-      variant: this.currentVariant,
-      intensity: 0.04 + Math.random() * 0.06,
-      regionCenter: 0.5,
-      regionHeight: 1.0,
-      jitter: Math.random(),
-    };
-  }
-
-  tick(dt: number): GlitchInstance {
-    this.variantSwapIn -= dt;
-    if (this.variantSwapIn <= 0) {
-      this.currentVariant = randVariant();
-      this.inst.variant = this.currentVariant;
-      this.inst.intensity = 0.04 + Math.random() * 0.08;
-      this.variantSwapIn = 6 + Math.random() * 6;
-    }
-    // Slowly drift jitter seed so the region shifts organically
-    this.jitterDrift += dt * 0.3;
-    this.inst.jitter = (Math.sin(this.jitterDrift) * 0.5 + 0.5);
-    return this.inst;
-  }
-}
-
 async function boot() {
   const canvas = document.getElementById('skull-canvas') as HTMLCanvasElement | null;
   if (!canvas) return;
@@ -118,8 +82,9 @@ async function boot() {
 
   const composer = createComposer(scene);
 
-  // Slot 0: ambient noise layer — always on at low intensity
-  const ambient = new AmbientSlot();
+  // Slot 0 is intentionally left at zero intensity — ambient was too
+  // sustained at 6-12s variant holds. Film grain + scanline shimmer in the
+  // skull material already provide a noise floor.
   // Slots 1, 2: independent burst schedulers with different rhythms
   const burstA = new BurstSlot(7, 16);
   const burstB = new BurstSlot(12, 28);
@@ -132,7 +97,6 @@ async function boot() {
     uniforms.uTime.value = scene.getTime();
     scene.skull.rotation.y += 0.003;
 
-    composer.setSlot(0, ambient.tick(dt));
     composer.setSlot(1, burstA.tick(dt));
     composer.setSlot(2, burstB.tick(dt));
 
