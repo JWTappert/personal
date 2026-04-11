@@ -22,8 +22,8 @@ vanilla Three.js, deploying to Cloudflare Pages. Replacing an old Next.js site.
 | 2 — Custom shader material | ✅ | ShaderMaterial with fresnel + scanlines |
 | 3 — Post-FX | ✅ | Multi-slot glitch composer, deviates from plan — see below |
 | 4 — Interactions | ✅ | Heavily iterated, deviates from plan — see below |
-| 5 — Idle decay | ⏭ **NEXT** | Plan tasks 16-17. Will wire idle twitch + glitch bursts when user is idle. `uDecayLevel` uniform already exists in material and vert shader uses it. |
-| 6 — HUD | ⏳ | DOM overlay with edge reveal. Plan tasks 18-20. |
+| 5 — Idle motion | ✅ | Replaced the plan's decay-twitch with an imperative `skullMotion` controller (look-around + jaw talk) when idle. See `docs/superpowers/specs/2026-04-11-skull-idle-motion-design.md` and `docs/superpowers/plans/2026-04-11-skull-idle-motion.md`. Glitch bursts unchanged. `uDecayLevel` / `vDisplace` removed from shader pipeline. |
+| 6 — HUD | ⏭ **NEXT** | DOM overlay with edge reveal. Plan tasks 18-20. |
 | 7 — Puzzle (TDD) | ⏳ | Acrostic + click combo. Plan tasks 21-29. |
 | 8 — Glitch hint flash | ⏳ | Plan task 30. |
 | 9 — Mobile touch | ⏳ | Plan tasks 31-32. |
@@ -111,8 +111,10 @@ The OBJ jaw/head identification uses bounding-box Y-center (jaw has lower Y).
 
 ## Where we left off
 
-Ready to start **Phase 5 — Idle decay**. Plan Task 16 creates `idle.ts`, Task 17
-wires it into the frame loop to drive `uDecayLevel` and idle glitch bursts.
+Ready to start **Phase 6 — HUD**. Plan Task 18 adds DOM overlay structure
+and CSS, Tasks 19-20 wire up edge-reveal and the first reveal animation.
 
-Context was cleared here because the session had 200K+ tokens of iteration. The
-code is in good shape: tested visually at each step, no known bugs, clean tree.
+Phase 5 (idle motion rework) is complete. The rework plan
+`docs/superpowers/plans/2026-04-11-skull-idle-motion.md` is a standalone
+document — resume from Phase 6 in the master plan
+`docs/superpowers/plans/2026-04-11-skull-site.md`.

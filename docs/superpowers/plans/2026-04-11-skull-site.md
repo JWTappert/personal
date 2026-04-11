@@ -1100,6 +1100,13 @@ git commit -m "feat: wire cursor parallax, scroll deconstruct, click pulse"
 
 ## Phase 5 — Idle decay
 
+> **SUPERSEDED 2026-04-11:** The original "decay twitch" design below was
+> replaced with an imperative skull-motion rework. See the spec
+> `docs/superpowers/specs/2026-04-11-skull-idle-motion-design.md` and the
+> rework plan `docs/superpowers/plans/2026-04-11-skull-idle-motion.md` for
+> the current Phase 5 truth. The original Tasks 16-17 below are kept for
+> historical reference only.
+
 ### Task 16: Create `idle.ts`
 
 **Files:**
