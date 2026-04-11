@@ -16,11 +16,30 @@ async function boot() {
   scene.setMaterial(material);
 
   const composer = createComposer(scene);
-  composer.setGlitch(glitchVariant, 0.3);  // steady-state low intensity
 
-  function frame() {
+  // Temporary burst-based glitch scheduler — replaced by idle.ts in Phase 5.
+  // Most of the time intensity is near zero; occasional short bursts spike it.
+  let burstIntensity = 0;
+  let nextBurstIn = 4 + Math.random() * 6;
+
+  let lastFrame = performance.now();
+  function frame(now: number) {
+    const dt = Math.min(0.1, (now - lastFrame) / 1000);
+    lastFrame = now;
+
     uniforms.uTime.value = scene.getTime();
     scene.skull.rotation.y += 0.003;
+
+    nextBurstIn -= dt;
+    if (nextBurstIn <= 0) {
+      burstIntensity = 0.55 + Math.random() * 0.35;
+      nextBurstIn = 4 + Math.random() * 8;
+    }
+    // Exponential-ish decay: ~300–400ms to near-zero after a spike
+    burstIntensity *= Math.pow(0.02, dt);
+
+    composer.setGlitch(glitchVariant, burstIntensity);
+
     composer.render();
     requestAnimationFrame(frame);
   }
