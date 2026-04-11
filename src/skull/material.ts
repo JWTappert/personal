@@ -5,7 +5,6 @@ import fragSrc from './shaders/skull.frag?raw';
 export interface SkullUniforms {
   uTime: { value: number };
   uNoiseSeed: { value: number };
-  uDecayLevel: { value: number };
   uClickPoint: { value: THREE.Vector3 };
   uRingEffect: { value: number };
   /** Current persistent skull color; updated on each click. */
@@ -21,7 +20,6 @@ export function createSkullMaterial(noiseSeed: number): {
   const uniforms: SkullUniforms = {
     uTime: { value: 0 },
     uNoiseSeed: { value: noiseSeed },
-    uDecayLevel: { value: 0 },
     uClickPoint: { value: new THREE.Vector3(0, 0, 0) },
     uRingEffect: { value: 0 },
     uBaseColor: { value: new THREE.Color(0x00ffc8) },

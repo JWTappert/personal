@@ -8,7 +8,6 @@ uniform bool uUnlocked;
 
 varying vec3 vNormal;
 varying vec3 vPosition;
-varying float vDisplace;
 varying vec3 vWorldPos;
 
 void main() {
@@ -27,7 +26,6 @@ void main() {
   float pat = fract(sin(dot(vPosition.xy + uNoiseSeed, vec2(12.9898, 78.233))) * 43758.5453);
 
   float brightness = fresnel * (0.6 + 0.6 * scan) + 0.08 * pat;
-  brightness += vDisplace * 0.3;
 
   // Click ring: expanding bright ring emanating from uClickPoint in local space.
   if (uRingEffect > 0.001) {
