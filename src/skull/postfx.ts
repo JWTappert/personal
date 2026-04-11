@@ -90,7 +90,7 @@ export function createComposer(scene: SceneHandle): ComposerHandle {
     });
   }
 
-  const clock = new THREE.Clock();
+  const timer = new THREE.Timer();
   let unlocked = false;
 
   function writeSlotToPass(slot: number) {
@@ -105,7 +105,8 @@ export function createComposer(scene: SceneHandle): ComposerHandle {
 
   return {
     render() {
-      const t = clock.getElapsedTime();
+      timer.update();
+      const t = timer.getElapsed();
       for (const pass of glitchPasses) pass.uniforms.uTime.value = t;
       composer.render();
     },

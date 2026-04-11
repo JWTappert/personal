@@ -115,7 +115,7 @@ export async function createScene(canvas: HTMLCanvasElement): Promise<SceneHandl
     skull.add(mesh);
   }
 
-  const clock = new THREE.Clock();
+  const timer = new THREE.Timer();
 
   return {
     scene,
@@ -137,7 +137,8 @@ export async function createScene(canvas: HTMLCanvasElement): Promise<SceneHandl
       camera.updateProjectionMatrix();
     },
     getTime() {
-      return clock.getElapsedTime();
+      timer.update();
+      return timer.getElapsed();
     },
     setMaterial(mat: THREE.Material) {
       currentMaterial = mat;
