@@ -64,11 +64,8 @@ class BurstSlot {
     this.inst.jitter = Math.random();
     // Quick flashes only: 100-220ms total lifetime
     this.lifetime = 0.1 + Math.random() * 0.12;
-    // ~12% chance of a cluster follow-up
-    const cluster = Math.random() < 0.12;
-    this.nextIn = cluster
-      ? 0.08 + Math.random() * 0.35
-      : this.minGap + Math.random() * (this.maxGap - this.minGap);
+    // Always a clean cooldown to the next burst — no cluster chaining
+    this.nextIn = this.minGap + Math.random() * (this.maxGap - this.minGap);
   }
 }
 
