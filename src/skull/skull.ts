@@ -5,6 +5,7 @@ import { createInteractions } from './interactions';
 import { createIdleBehavior } from './idle';
 import { createSkullMotion } from './skullMotion';
 import { createHud, type PuzzleLinesProvider } from './hud';
+import { createPuzzle } from './puzzle';
 
 // Neon palette for click color flash
 const CLICK_COLORS: number[] = [
@@ -116,18 +117,16 @@ async function boot() {
   const skullMotion = createSkullMotion(scene);
   const idle = createIdleBehavior(bus, skullMotion);
 
-  const stubProvider: PuzzleLinesProvider = {
-    getHudLines: () => ({
-      tl: 'SYS_/CRANIUM.v2',
-      tr: '42.5°N -123.8°W',
-      bl: 'LINK_OK',
-      br: '▓▒░ STANDBY',
-    }),
-    isUnlocked: () => false,
-  };
-
+  const puzzle = createPuzzle(bus);
   const hudEl = document.getElementById('hud') as HTMLElement;
-  const hud = createHud(hudEl, bus, stubProvider);
+  const hud = createHud(hudEl, bus, puzzle);
+
+  puzzle.onUnlock(() => {
+    console.log('[puzzle] UNLOCKED');
+    composer.setUnlocked(true);
+    hud.setUnlocked(true);
+    uniforms.uUnlocked.value = true;
+  });
 
   // Click state
   let ringEffect = 0;               // expanding shader ring
