@@ -1,8 +1,6 @@
 uniform float uTime;
 uniform float uNoiseSeed;
 uniform float uDecayLevel;
-uniform float uScroll;
-uniform float uClickPulse;
 
 varying vec3 vNormal;
 varying vec3 vPosition;
@@ -32,18 +30,13 @@ void main() {
   vNormal = normalize(normalMatrix * normal);
   vPosition = position;
 
-  // Start with the undisplaced position; scroll no longer drives geometry —
-  // the fragment shader handles scroll via palette shift + dissolve.
+  // Scroll drives the jaw hinge (not vertex displacement). Idle decay adds
+  // a gentle twitch when no input is happening.
   vec3 displaced = position;
-
-  // Idle decay twitch
   float twitch = noise(position * 0.3 + uTime * 0.5 + uNoiseSeed) - 0.5;
   displaced += normal * twitch * uDecayLevel * 0.6;
 
-  // Click pulse: outward spike that decays (for head/crown clicks)
-  displaced += normal * uClickPulse * 2.0;
-
-  vDisplace = uDecayLevel * 0.5 + uClickPulse;
+  vDisplace = uDecayLevel * 0.5;
 
   vWorldPos = (modelMatrix * vec4(displaced, 1.0)).xyz;
   gl_Position = projectionMatrix * modelViewMatrix * vec4(displaced, 1.0);

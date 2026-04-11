@@ -1,8 +1,9 @@
 uniform float uTime;
 uniform float uNoiseSeed;
-uniform float uScroll;
 uniform float uRingEffect;
 uniform vec3 uClickPoint;
+uniform vec3 uClickColor;
+uniform float uClickColorStrength;
 uniform vec2 uCursor;
 uniform bool uUnlocked;
 
@@ -11,29 +12,12 @@ varying vec3 vPosition;
 varying float vDisplace;
 varying vec3 vWorldPos;
 
-// Palette waypoints — neon family.
-vec3 paletteFor(float t) {
-  vec3 cyan    = vec3(0.00, 1.00, 0.78);
-  vec3 green   = vec3(0.35, 1.00, 0.10);
-  vec3 amber   = vec3(1.00, 0.70, 0.00);
-  vec3 magenta = vec3(1.00, 0.10, 0.80);
-  float k = t * 3.0;
-  if (k < 1.0)      return mix(cyan, green, k);
-  else if (k < 2.0) return mix(green, amber, k - 1.0);
-  else              return mix(amber, magenta, clamp(k - 2.0, 0.0, 1.0));
-}
-
-float hash(vec2 p) {
-  return fract(sin(dot(p, vec2(12.9898, 78.233))) * 43758.5453);
-}
-
 void main() {
-  // Base color: unlocked state overrides, otherwise scroll drives palette.
-  vec3 base = uUnlocked ? vec3(1.0, 0.1, 0.2) : paletteFor(clamp(uScroll, 0.0, 1.0));
-
-  // Dissolve: progressively discard fragments as scroll increases.
-  float dissolveNoise = hash(vPosition.xy + uNoiseSeed + vPosition.zz * 0.7);
-  if (uScroll > 0.001 && dissolveNoise < uScroll * 0.85) discard;
+  // Base color: unlocked state overrides; otherwise cyan, with a transient
+  // click-driven color mixed in that fades after each click.
+  vec3 idleBase = vec3(0.00, 1.00, 0.78);
+  vec3 base = uUnlocked ? vec3(1.0, 0.1, 0.2)
+                        : mix(idleBase, uClickColor, uClickColorStrength);
 
   // Fresnel rim: bright edges
   vec3 viewDir = vec3(0.0, 0.0, 1.0);
@@ -49,8 +33,6 @@ void main() {
   brightness += vDisplace * 0.3;
 
   // Click ring: expanding bright ring emanating from uClickPoint in local space.
-  // Driven by uRingEffect (1.0 at click, decays to 0). Uses local vPosition so
-  // the ring stays anchored to the skull as it rotates.
   if (uRingEffect > 0.001) {
     float d = distance(vPosition, uClickPoint);
     float ringRadius = (1.0 - uRingEffect) * 4.0;

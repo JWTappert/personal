@@ -6,10 +6,10 @@ export interface SkullUniforms {
   uTime: { value: number };
   uNoiseSeed: { value: number };
   uDecayLevel: { value: number };
-  uScroll: { value: number };
-  uClickPulse: { value: number };
   uClickPoint: { value: THREE.Vector3 };
   uRingEffect: { value: number };
+  uClickColor: { value: THREE.Color };
+  uClickColorStrength: { value: number };
   uCursor: { value: THREE.Vector2 };
   uUnlocked: { value: boolean };
 }
@@ -22,10 +22,10 @@ export function createSkullMaterial(noiseSeed: number): {
     uTime: { value: 0 },
     uNoiseSeed: { value: noiseSeed },
     uDecayLevel: { value: 0 },
-    uScroll: { value: 0 },
-    uClickPulse: { value: 0 },
     uClickPoint: { value: new THREE.Vector3(0, 0, 0) },
     uRingEffect: { value: 0 },
+    uClickColor: { value: new THREE.Color(0x00ffc8) },
+    uClickColorStrength: { value: 0 },
     uCursor: { value: new THREE.Vector2(0, 0) },
     uUnlocked: { value: false },
   };

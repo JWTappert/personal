@@ -3,6 +3,16 @@ import { createSkullMaterial } from './material';
 import { createComposer, type GlitchInstance } from './postfx';
 import { createInteractions } from './interactions';
 
+// Neon palette for click color flash
+const CLICK_COLORS: number[] = [
+  0x00ffc8,  // cyan (idle)
+  0x5bff1a,  // acid green
+  0xffb000,  // amber
+  0xff1a80,  // magenta
+  0xff3030,  // red
+  0x30a0ff,  // electric blue
+];
+
 type Variant = 0 | 1 | 2;
 
 function randVariant(): Variant {
@@ -101,10 +111,10 @@ async function boot() {
 
   const bus = createInteractions(canvas, scene);
 
-  // Click state: each part has a distinct reaction.
-  let clickPulse = 0;      // vertex-outward pulse (crown/other clicks)
-  let ringEffect = 0;      // expanding shader ring for eye clicks
-  let jawDrop = 0;         // jaw mesh translation magnitude
+  // Click state
+  let ringEffect = 0;               // expanding shader ring
+  let clickColorStrength = 0;       // base color shift amount after a click
+  let jawClickBonus = 0;            // transient extra jaw opening from clicking the jaw
   const clickPoint = { x: 0, y: 0, z: 0 };
 
   bus.on('click', ({ skullPart, hitLocal }) => {
@@ -114,11 +124,13 @@ async function boot() {
       clickPoint.y = hitLocal.y;
       clickPoint.z = hitLocal.z;
     }
-    // Every click triggers the expanding ring effect at the hit point.
-    // Jaw clicks additionally hinge the jaw.
     ringEffect = 1;
+    // Pick a random neon color different from the current one
+    const pick = CLICK_COLORS[1 + Math.floor(Math.random() * (CLICK_COLORS.length - 1))];
+    uniforms.uClickColor.value.setHex(pick);
+    clickColorStrength = 1;
     if (skullPart === 'jaw') {
-      jawDrop = 1;
+      jawClickBonus = 1;
     }
   });
 
@@ -166,24 +178,24 @@ async function boot() {
     scene.skull.rotation.x += (targetPitch - scene.skull.rotation.x) * rate;
     scene.skull.position.x = cursorState.x * 0.15;
 
-    // Scroll palette + dissolve (fragment shader handles both)
-    uniforms.uScroll.value = bus.getScroll();
+    // Scroll drives the jaw hinge directly. Max ~32 degrees open at full scroll.
+    const scroll = bus.getScroll();
+    // Jaw click bonus decays over ~0.6s
+    jawClickBonus = Math.max(0, jawClickBonus - dt / 0.6);
+    if (scene.jawPivot) {
+      const scrollAngle = scroll * 0.55;
+      const bonusAngle = jawClickBonus * 0.25;
+      scene.jawPivot.rotation.x = Math.min(0.8, scrollAngle + bonusAngle);
+    }
 
-    // Click pulse decay (1.2s to zero) — outward vertex spike for crown/other clicks
-    clickPulse = Math.max(0, clickPulse - dt / 1.2);
-    uniforms.uClickPulse.value = clickPulse;
-
-    // Ring effect decay (~1s) — expanding bright ring for eye clicks
+    // Ring effect decay (~1s) — expanding bright ring from the click point
     ringEffect = Math.max(0, ringEffect - dt / 1.0);
     uniforms.uRingEffect.value = ringEffect;
     uniforms.uClickPoint.value.set(clickPoint.x, clickPoint.y, clickPoint.z);
 
-    // Jaw drop decay (~0.8s) — rotate around hinge pivot like a real jaw
-    jawDrop = Math.max(0, jawDrop - dt / 0.8);
-    if (scene.jawPivot) {
-      // ~23 degrees of opening at peak
-      scene.jawPivot.rotation.x = jawDrop * 0.4;
-    }
+    // Click color decay (~1.5s fade back to cyan base)
+    clickColorStrength = Math.max(0, clickColorStrength - dt / 1.5);
+    uniforms.uClickColorStrength.value = clickColorStrength;
 
     composer.setSlot(0, ambientBurst.tick(dt));
     composer.setSlot(1, burstA.tick(dt));
