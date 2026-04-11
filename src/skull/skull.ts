@@ -47,8 +47,8 @@ class BurstSlot {
     this.inst.jitter = Math.random();
     // ~30% of bursts linger, 70% are quick flashes
     this.decayRate = Math.random() < 0.3 ? 0.0005 : 0.02;
-    // ~25% chance of a cluster follow-up
-    const cluster = Math.random() < 0.25;
+    // ~15% chance of a cluster follow-up
+    const cluster = Math.random() < 0.15;
     this.nextIn = cluster
       ? 0.08 + Math.random() * 0.35
       : this.minGap + Math.random() * (this.maxGap - this.minGap);
@@ -107,8 +107,8 @@ async function boot() {
   // Slot 0: ambient noise layer — always on at low intensity
   const ambient = new AmbientSlot();
   // Slots 1, 2: independent burst schedulers with different rhythms
-  const burstA = new BurstSlot(1, 3, 9);
-  const burstB = new BurstSlot(2, 5, 14);
+  const burstA = new BurstSlot(1, 7, 16);
+  const burstB = new BurstSlot(2, 12, 28);
 
   let lastFrame = performance.now();
   function frame(now: number) {
