@@ -126,6 +126,9 @@ async function boot() {
     composer.setUnlocked(true);
     hud.setUnlocked(true);
     uniforms.uUnlocked.value = true;
+    // Shader branches to vec3(1.0, 0.1, 0.2) when unlocked regardless of
+    // uBaseColor — mirror that into --hud-rgb so the HUD matches.
+    document.documentElement.style.setProperty('--hud-rgb', '255 25 51');
   });
 
   // Click state
@@ -142,6 +145,12 @@ async function boot() {
       clickPoint.z = hitLocal.z;
     }
     ringEffect = 1;
+    if (skullPart === 'jaw') {
+      jawClickBonus = 1;
+    }
+    // Post-unlock: skip the color cycle. The shader ignores uBaseColor once
+    // uUnlocked is true (renders red), so cycling would only desync --hud-rgb.
+    if (puzzle.isUnlocked()) return;
     // Pick a new color — any from the palette except the current one
     let next = Math.floor(Math.random() * (CLICK_COLORS.length - 1));
     if (next >= currentColorIndex) next += 1;
@@ -153,9 +162,6 @@ async function boot() {
       '--hud-rgb',
       `${Math.round(c.r * 255)} ${Math.round(c.g * 255)} ${Math.round(c.b * 255)}`
     );
-    if (skullPart === 'jaw') {
-      jawClickBonus = 1;
-    }
   });
 
   // Three burst slots with distinct personalities.

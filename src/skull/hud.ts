@@ -33,17 +33,15 @@ export function createHud(
 
   return {
     tick(t: number) {
-      // Opacity driven by edge proximity (smooth curve)
-      const p = bus.getCursor().edgeProximity;
-      const targetOpacity = Math.pow(p, 1.4);
-      root.style.opacity = String(targetOpacity);
-      root.classList.toggle('revealed', targetOpacity > 0.3);
-
       const lines = provider.getHudLines(t);
       corners.tl.textContent = lines.tl;
       corners.tr.textContent = lines.tr;
       corners.bl.textContent = lines.bl;
-      corners.br.textContent = lines.br;
+      // Once unlocked, setUnlocked has written 'well played.' into br — don't
+      // let the per-frame provider update overwrite it.
+      if (!unlocked) {
+        corners.br.textContent = lines.br;
+      }
     },
     setUnlocked(flag: boolean) {
       unlocked = flag;
