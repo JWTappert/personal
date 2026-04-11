@@ -68,7 +68,11 @@
         transition: color 400ms linear, border-color 400ms linear;
       }
       #hud .hud-bar.hud-top { top: 0; border-bottom: 1px solid rgb(var(--hud-rgb) / 0.25); }
-      #hud .hud-bar.hud-bottom { bottom: 0; border-top: 1px solid rgb(var(--hud-rgb) / 0.25); }
+      #hud .hud-bar.hud-bottom {
+        bottom: 0;
+        border-top: 1px solid rgb(var(--hud-rgb) / 0.25);
+        justify-content: flex-end;
+      }
       #hud.revealed { opacity: 1; }
     </style>
   </head>
