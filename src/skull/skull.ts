@@ -1,6 +1,7 @@
 import { createScene } from './scene';
 import { createSkullMaterial } from './material';
 import { createComposer, type GlitchInstance } from './postfx';
+import { createInteractions } from './interactions';
 
 type Variant = 0 | 1 | 2;
 
@@ -98,6 +99,13 @@ async function boot() {
 
   const composer = createComposer(scene);
 
+  const bus = createInteractions(canvas, scene);
+  let clickPulse = 0;
+  bus.on('click', ({ skullPart }) => {
+    console.log('[click]', skullPart);
+    clickPulse = 1;
+  });
+
   // Three burst slots with distinct personalities.
   // Slot 0: rare ambient-style burst — full-screen, longer, lower intensity,
   //         infrequent. Reads as "signal drift" rather than a glitch.
@@ -126,6 +134,19 @@ async function boot() {
 
     uniforms.uTime.value = scene.getTime();
     scene.skull.rotation.y += 0.003;
+
+    // Parallax (cursor magnetism)
+    const cursorState = bus.getCursor();
+    uniforms.uCursor.value.set(cursorState.x, cursorState.y);
+    scene.skull.rotation.x = cursorState.y * 0.1;
+    scene.skull.position.x = cursorState.x * 0.3;
+
+    // Scroll deconstruction
+    uniforms.uScroll.value = bus.getScroll();
+
+    // Click pulse decay (1.2s to zero)
+    clickPulse = Math.max(0, clickPulse - dt / 1.2);
+    uniforms.uClickPulse.value = clickPulse;
 
     composer.setSlot(0, ambientBurst.tick(dt));
     composer.setSlot(1, burstA.tick(dt));
