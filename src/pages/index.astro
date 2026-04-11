@@ -4,10 +4,42 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
+    <meta name="description" content="" />
     <title>skull</title>
+    <style is:global>
+      * { box-sizing: border-box; margin: 0; padding: 0; }
+      html, body {
+        height: 100%;
+        width: 100%;
+        background: #000;
+        color: #00ffc8;
+        font-family: ui-monospace, "Courier New", monospace;
+        overflow: hidden;
+        overscroll-behavior: none;
+      }
+      canvas#skull-canvas {
+        position: fixed;
+        inset: 0;
+        width: 100vw;
+        height: 100vh;
+        display: block;
+      }
+      #hud {
+        position: fixed;
+        inset: 0;
+        pointer-events: none;
+        opacity: 0;
+        transition: opacity 180ms linear;
+      }
+      #hud a { pointer-events: auto; color: inherit; }
+    </style>
   </head>
   <body>
-    <p>bootstrapping…</p>
+    <canvas id="skull-canvas"></canvas>
+    <div id="hud" aria-hidden="true"></div>
+    <script>
+      import '../skull/skull.ts';
+    </script>
   </body>
 </html>
