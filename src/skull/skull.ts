@@ -4,6 +4,7 @@ import { createComposer, type GlitchInstance } from './postfx';
 import { createInteractions } from './interactions';
 import { createIdleBehavior } from './idle';
 import { createSkullMotion } from './skullMotion';
+import { createHud, type PuzzleLinesProvider } from './hud';
 
 // Neon palette for click color flash
 const CLICK_COLORS: number[] = [
@@ -114,6 +115,19 @@ async function boot() {
   const bus = createInteractions(canvas, scene);
   const skullMotion = createSkullMotion(scene);
   const idle = createIdleBehavior(bus, skullMotion);
+
+  const stubProvider: PuzzleLinesProvider = {
+    getHudLines: () => ({
+      tl: 'SYS_/CRANIUM.v2',
+      tr: '42.5°N -123.8°W',
+      bl: 'LINK_OK',
+      br: '▓▒░ STANDBY',
+    }),
+    isUnlocked: () => false,
+  };
+
+  const hudEl = document.getElementById('hud') as HTMLElement;
+  const hud = createHud(hudEl, bus, stubProvider);
 
   // Click state
   let ringEffect = 0;               // expanding shader ring
@@ -228,6 +242,7 @@ async function boot() {
     composer.setSlot(3, idleGlitchInst);
 
     composer.render();
+    hud.tick(t);
     requestAnimationFrame(frame);
   }
   requestAnimationFrame(frame);
