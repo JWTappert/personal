@@ -98,3 +98,14 @@ export class SequenceDetector {
     this.callbacks.push(cb);
   }
 }
+
+const HINT_SYMBOLS: Record<string, string> = {
+  leftEye: '◉',
+  rightEye: '○',
+  jaw: '▼',
+  head: '△',
+};
+
+export function formatGlitchHint(sequence: readonly string[]): string {
+  return sequence.map((s) => HINT_SYMBOLS[s] ?? '?').join(' ');
+}
