@@ -114,8 +114,9 @@ async function boot() {
       clickPoint.y = hitLocal.y;
       clickPoint.z = hitLocal.z;
     }
-    // Every click triggers the outward pulse. Jaw clicks additionally hinge.
-    clickPulse = 1;
+    // Every click triggers the expanding ring effect at the hit point.
+    // Jaw clicks additionally hinge the jaw.
+    ringEffect = 1;
     if (skullPart === 'jaw') {
       jawDrop = 1;
     }
