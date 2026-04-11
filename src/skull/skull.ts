@@ -114,12 +114,10 @@ async function boot() {
       clickPoint.y = hitLocal.y;
       clickPoint.z = hitLocal.z;
     }
+    // Every click triggers the outward pulse. Jaw clicks additionally hinge.
+    clickPulse = 1;
     if (skullPart === 'jaw') {
       jawDrop = 1;
-    } else if (skullPart === 'leftEye' || skullPart === 'rightEye') {
-      ringEffect = 1;
-    } else {
-      clickPulse = 1;
     }
   });
 
