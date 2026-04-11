@@ -59,3 +59,42 @@ export function buildAcrosticPool(word: string): string[] {
 
   return pool;
 }
+
+export type ClickTarget = 'leftEye' | 'rightEye' | 'jaw' | 'head' | 'other';
+
+export class SequenceDetector {
+  private buffer: string[] = [];
+  private unlocked = false;
+  private callbacks: Array<() => void> = [];
+
+  constructor(private readonly secret: readonly string[]) {}
+
+  push(target: string): void {
+    if (this.unlocked) return;
+    this.buffer.push(target);
+    if (this.buffer.length > this.secret.length) {
+      this.buffer.shift();
+    }
+    if (this.buffer.length === this.secret.length) {
+      let matches = true;
+      for (let i = 0; i < this.secret.length; i++) {
+        if (this.buffer[i] !== this.secret[i]) {
+          matches = false;
+          break;
+        }
+      }
+      if (matches) {
+        this.unlocked = true;
+        for (const cb of this.callbacks) cb();
+      }
+    }
+  }
+
+  isUnlocked(): boolean {
+    return this.unlocked;
+  }
+
+  onUnlock(cb: () => void): void {
+    this.callbacks.push(cb);
+  }
+}
