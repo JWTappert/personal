@@ -11,14 +11,18 @@ function randVariant(): Variant {
 /**
  * One independent burst slot. Owns its own timing, decay, and randomization.
  * Multiple slots run in parallel so different glitch types can overlap.
+ *
+ * Each burst has an explicit lifetime (quick flash or linger) and an envelope:
+ * fast attack (~20ms), then linear decay to 0 over the rest of the lifetime.
  */
 class BurstSlot {
-  intensity = 0;
-  private decayRate = 0.02;
+  private age = 0;
+  private lifetime = 0;
+  private peak = 0;
   private nextIn: number;
   private inst: GlitchInstance;
 
-  constructor(private readonly slotIndex: number, private readonly minGap: number, private readonly maxGap: number) {
+  constructor(private readonly minGap: number, private readonly maxGap: number) {
     this.nextIn = minGap + Math.random() * (maxGap - minGap);
     this.inst = {
       variant: 0,
@@ -34,21 +38,36 @@ class BurstSlot {
     if (this.nextIn <= 0) {
       this.trigger();
     }
-    this.intensity *= Math.pow(this.decayRate, dt);
-    this.inst.intensity = this.intensity;
+
+    this.age += dt;
+    if (this.age >= this.lifetime) {
+      this.inst.intensity = 0;
+    } else {
+      const attack = 0.02;  // 20ms rise
+      let envelope: number;
+      if (this.age < attack) {
+        envelope = this.age / attack;
+      } else {
+        envelope = 1 - (this.age - attack) / (this.lifetime - attack);
+      }
+      this.inst.intensity = this.peak * envelope;
+    }
     return this.inst;
   }
 
   private trigger() {
-    this.intensity = 0.5 + Math.random() * 0.5;
+    this.age = 0;
+    this.peak = 0.5 + Math.random() * 0.5;
     this.inst.variant = randVariant();
     this.inst.regionCenter = 0.2 + Math.random() * 0.6;
     this.inst.regionHeight = 0.08 + Math.random() * 0.32;
     this.inst.jitter = Math.random();
-    // ~30% of bursts linger, 70% are quick flashes
-    this.decayRate = Math.random() < 0.3 ? 0.0005 : 0.02;
-    // ~15% chance of a cluster follow-up
-    const cluster = Math.random() < 0.15;
+    // ~85% quick flashes (120-250ms), ~15% linger (400-700ms)
+    this.lifetime = Math.random() < 0.15
+      ? 0.4 + Math.random() * 0.3
+      : 0.12 + Math.random() * 0.13;
+    // ~12% chance of a cluster follow-up
+    const cluster = Math.random() < 0.12;
     this.nextIn = cluster
       ? 0.08 + Math.random() * 0.35
       : this.minGap + Math.random() * (this.maxGap - this.minGap);
@@ -107,8 +126,8 @@ async function boot() {
   // Slot 0: ambient noise layer — always on at low intensity
   const ambient = new AmbientSlot();
   // Slots 1, 2: independent burst schedulers with different rhythms
-  const burstA = new BurstSlot(1, 7, 16);
-  const burstB = new BurstSlot(2, 12, 28);
+  const burstA = new BurstSlot(7, 16);
+  const burstB = new BurstSlot(12, 28);
 
   let lastFrame = performance.now();
   function frame(now: number) {
