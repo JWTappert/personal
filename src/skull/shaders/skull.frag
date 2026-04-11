@@ -2,8 +2,7 @@ uniform float uTime;
 uniform float uNoiseSeed;
 uniform float uRingEffect;
 uniform vec3 uClickPoint;
-uniform vec3 uClickColor;
-uniform float uClickColorStrength;
+uniform vec3 uBaseColor;
 uniform vec2 uCursor;
 uniform bool uUnlocked;
 
@@ -13,11 +12,9 @@ varying float vDisplace;
 varying vec3 vWorldPos;
 
 void main() {
-  // Base color: unlocked state overrides; otherwise cyan, with a transient
-  // click-driven color mixed in that fades after each click.
-  vec3 idleBase = vec3(0.00, 1.00, 0.78);
-  vec3 base = uUnlocked ? vec3(1.0, 0.1, 0.2)
-                        : mix(idleBase, uClickColor, uClickColorStrength);
+  // Unlocked state wins; otherwise use the persistent uBaseColor which is
+  // updated on each click to cycle through the neon palette.
+  vec3 base = uUnlocked ? vec3(1.0, 0.1, 0.2) : uBaseColor;
 
   // Fresnel rim: bright edges
   vec3 viewDir = vec3(0.0, 0.0, 1.0);

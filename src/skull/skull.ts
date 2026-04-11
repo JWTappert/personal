@@ -113,8 +113,8 @@ async function boot() {
 
   // Click state
   let ringEffect = 0;               // expanding shader ring
-  let clickColorStrength = 0;       // base color shift amount after a click
   let jawClickBonus = 0;            // transient extra jaw opening from clicking the jaw
+  let currentColorIndex = 0;        // index into CLICK_COLORS for uBaseColor
   const clickPoint = { x: 0, y: 0, z: 0 };
 
   bus.on('click', ({ skullPart, hitLocal }) => {
@@ -125,10 +125,11 @@ async function boot() {
       clickPoint.z = hitLocal.z;
     }
     ringEffect = 1;
-    // Pick a random neon color different from the current one
-    const pick = CLICK_COLORS[1 + Math.floor(Math.random() * (CLICK_COLORS.length - 1))];
-    uniforms.uClickColor.value.setHex(pick);
-    clickColorStrength = 1;
+    // Pick a new color — any from the palette except the current one
+    let next = Math.floor(Math.random() * (CLICK_COLORS.length - 1));
+    if (next >= currentColorIndex) next += 1;
+    currentColorIndex = next;
+    uniforms.uBaseColor.value.setHex(CLICK_COLORS[currentColorIndex]);
     if (skullPart === 'jaw') {
       jawClickBonus = 1;
     }
@@ -192,10 +193,6 @@ async function boot() {
     ringEffect = Math.max(0, ringEffect - dt / 1.0);
     uniforms.uRingEffect.value = ringEffect;
     uniforms.uClickPoint.value.set(clickPoint.x, clickPoint.y, clickPoint.z);
-
-    // Click color decay (~1.5s fade back to cyan base)
-    clickColorStrength = Math.max(0, clickColorStrength - dt / 1.5);
-    uniforms.uClickColorStrength.value = clickColorStrength;
 
     composer.setSlot(0, ambientBurst.tick(dt));
     composer.setSlot(1, burstA.tick(dt));
