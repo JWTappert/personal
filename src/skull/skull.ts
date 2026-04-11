@@ -2,6 +2,7 @@ import { createScene } from './scene';
 import { createSkullMaterial } from './material';
 import { createComposer, type GlitchInstance } from './postfx';
 import { createInteractions } from './interactions';
+import { createIdleBehavior } from './idle';
 
 // Neon palette for click color flash
 const CLICK_COLORS: number[] = [
@@ -110,6 +111,7 @@ async function boot() {
   const composer = createComposer(scene);
 
   const bus = createInteractions(canvas, scene);
+  const idle = createIdleBehavior(bus);
 
   // Click state
   let ringEffect = 0;               // expanding shader ring
@@ -156,6 +158,16 @@ async function boot() {
     peak: [0.5, 1.0],
   });
 
+  // Idle burst glitch (slot 3) — driven by idle.getGlitchBurst()
+  let prevIdleBurst = 0;
+  const idleGlitchInst: GlitchInstance = {
+    variant: 0,
+    intensity: 0,
+    regionCenter: 0.5,
+    regionHeight: 1.0,
+    jitter: 0,
+  };
+
   let lastFrame = performance.now();
   function frame(now: number) {
     const dt = Math.min(0.1, (now - lastFrame) / 1000);
@@ -163,6 +175,9 @@ async function boot() {
 
     const t = scene.getTime();
     uniforms.uTime.value = t;
+
+    idle.tick(dt);
+    uniforms.uDecayLevel.value = idle.getDecayLevel();
 
     // Lazy eye tracking: the skull drifts toward facing the cursor over
     // ~2.8 seconds. A slow sine wobble adds a "distracted" feel so it never
@@ -197,6 +212,17 @@ async function boot() {
     composer.setSlot(0, ambientBurst.tick(dt));
     composer.setSlot(1, burstA.tick(dt));
     composer.setSlot(2, burstB.tick(dt));
+
+    const idleBurst = idle.getGlitchBurst();
+    if (prevIdleBurst <= 0 && idleBurst > 0) {
+      idleGlitchInst.variant = Math.floor(Math.random() * 3) as 0 | 1 | 2;
+      idleGlitchInst.regionCenter = 0.2 + Math.random() * 0.6;
+      idleGlitchInst.regionHeight = 0.08 + Math.random() * 0.32;
+      idleGlitchInst.jitter = Math.random();
+    }
+    idleGlitchInst.intensity = idleBurst;
+    prevIdleBurst = idleBurst;
+    composer.setSlot(3, idleGlitchInst);
 
     composer.render();
     requestAnimationFrame(frame);

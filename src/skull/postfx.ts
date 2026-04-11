@@ -22,7 +22,7 @@ export interface GlitchInstance {
   jitter: number;
 }
 
-export const GLITCH_SLOT_COUNT = 3;
+export const GLITCH_SLOT_COUNT = 4;
 
 export interface ComposerHandle {
   render(): void;
