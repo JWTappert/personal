@@ -30,7 +30,6 @@ export function createHud(
   };
 
   let unlocked = false;
-  let lastLinesUpdate = 0;
 
   return {
     tick(t: number) {
@@ -40,15 +39,11 @@ export function createHud(
       root.style.opacity = String(targetOpacity);
       root.classList.toggle('revealed', targetOpacity > 0.3);
 
-      // Update lines ~3x per second
-      if (t - lastLinesUpdate > 350) {
-        const lines = provider.getHudLines(t);
-        corners.tl.textContent = lines.tl;
-        corners.tr.textContent = lines.tr;
-        corners.bl.textContent = lines.bl;
-        corners.br.textContent = lines.br;
-        lastLinesUpdate = t;
-      }
+      const lines = provider.getHudLines(t);
+      corners.tl.textContent = lines.tl;
+      corners.tr.textContent = lines.tr;
+      corners.bl.textContent = lines.bl;
+      corners.br.textContent = lines.br;
     },
     setUnlocked(flag: boolean) {
       unlocked = flag;

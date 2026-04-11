@@ -8,15 +8,21 @@
     <meta name="description" content="" />
     <title>skull</title>
     <style is:global>
+      :root {
+        /* Space-separated RGB components used by rgb(var(--hud-rgb) / alpha).
+           Updated from skull.ts on click to match the current skull color. */
+        --hud-rgb: 0 255 200;
+      }
       * { box-sizing: border-box; margin: 0; padding: 0; }
       html, body {
         height: 100%;
         width: 100%;
         background: #000;
-        color: #00ffc8;
+        color: rgb(var(--hud-rgb));
         font-family: ui-monospace, "Courier New", monospace;
         overflow: hidden;
         overscroll-behavior: none;
+        transition: color 400ms linear;
       }
       canvas#skull-canvas {
         position: fixed;
@@ -31,23 +37,22 @@
         pointer-events: none;
         opacity: 0;
         transition: opacity 180ms linear;
-      }
-      #hud a { pointer-events: auto; color: inherit; }
-      #hud {
         font-size: 11px;
         letter-spacing: 0.08em;
         text-transform: uppercase;
       }
+      #hud a { pointer-events: auto; color: inherit; }
       #hud .hud-corner {
         position: absolute;
         padding: 14px 18px;
-        color: #00ffc8;
-        text-shadow: 0 0 6px rgba(0, 255, 200, 0.6);
+        color: rgb(var(--hud-rgb));
+        text-shadow: 0 0 6px rgb(var(--hud-rgb) / 0.6);
         white-space: pre;
         line-height: 1.55;
+        transition: color 400ms linear, text-shadow 400ms linear;
       }
-      #hud .hud-tl { top: 0; left: 0; text-align: left; }
-      #hud .hud-tr { top: 0; right: 0; text-align: right; }
+      #hud .hud-tl { top: 32px; left: 0; text-align: left; }
+      #hud .hud-tr { top: 32px; right: 0; text-align: right; }
       #hud .hud-bl { bottom: 32px; left: 0; }
       #hud .hud-br { bottom: 32px; right: 0; text-align: right; }
       #hud .hud-bar {
@@ -59,10 +64,11 @@
         gap: 24px;
         padding: 0 18px;
         font-size: 10px;
-        color: #00ffc8;
+        color: rgb(var(--hud-rgb));
+        transition: color 400ms linear, border-color 400ms linear;
       }
-      #hud .hud-bar.hud-top { top: 0; border-bottom: 1px solid rgba(0,255,200,0.25); }
-      #hud .hud-bar.hud-bottom { bottom: 0; border-top: 1px solid rgba(0,255,200,0.25); }
+      #hud .hud-bar.hud-top { top: 0; border-bottom: 1px solid rgb(var(--hud-rgb) / 0.25); }
+      #hud .hud-bar.hud-bottom { bottom: 0; border-top: 1px solid rgb(var(--hud-rgb) / 0.25); }
       #hud.revealed { opacity: 1; }
     </style>
   </head>

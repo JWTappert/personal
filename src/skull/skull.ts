@@ -148,6 +148,12 @@ async function boot() {
     if (next >= currentColorIndex) next += 1;
     currentColorIndex = next;
     uniforms.uBaseColor.value.setHex(CLICK_COLORS[currentColorIndex]);
+    // Update the --hud-rgb CSS variable so the HUD tracks the skull's color.
+    const c = uniforms.uBaseColor.value;
+    document.documentElement.style.setProperty(
+      '--hud-rgb',
+      `${Math.round(c.r * 255)} ${Math.round(c.g * 255)} ${Math.round(c.b * 255)}`
+    );
     if (skullPart === 'jaw') {
       jawClickBonus = 1;
     }
