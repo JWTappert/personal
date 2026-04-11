@@ -5,7 +5,8 @@ export type SkullPart = 'leftEye' | 'rightEye' | 'jaw' | 'other';
 
 export type InteractionEventMap = {
   pointer: { x: number; y: number };
-  click: { skullPart: SkullPart };
+  /** `hitLocal` is the click point in the skull group's local space, or null if clicked outside the skull. */
+  click: { skullPart: SkullPart; hitLocal: { x: number; y: number; z: number } | null };
   scroll: { delta: number; total: number };
   edge: { proximity: number };
   key: { char: string };
@@ -65,32 +66,44 @@ export function createInteractions(
   }
 
   function onClick(e: PointerEvent) {
-    const part = pickSkullPart(e);
-    emit('click', { skullPart: part });
+    const result = pickSkullPart(e);
+    emit('click', result);
   }
 
   // Raycaster reused across clicks
   const raycaster = new THREE.Raycaster();
   const ndc = new THREE.Vector2();
 
-  function pickSkullPart(e: PointerEvent): SkullPart {
+  function pickSkullPart(e: PointerEvent): {
+    skullPart: SkullPart;
+    hitLocal: { x: number; y: number; z: number } | null;
+  } {
     const rect = canvas.getBoundingClientRect();
     ndc.x = ((e.clientX - rect.left) / rect.width) * 2 - 1;
     ndc.y = -(((e.clientY - rect.top) / rect.height) * 2 - 1);
     raycaster.setFromCamera(ndc, scene.camera);
     const hits = raycaster.intersectObjects(scene.skull.children, true);
-    if (hits.length === 0) return 'other';
+    if (hits.length === 0) return { skullPart: 'other', hitLocal: null };
     const hit = hits[0];
     const part = (hit.object.userData.part as string) ?? 'head';
-    if (part === 'jaw') return 'jaw';
 
-    // Map hit position onto the head: left vs right eye region vs rest
-    const local = hit.object.worldToLocal(hit.point.clone());
-    // Eye region: upper half of head (y > 0 in local), abs(x) > 0.3 radius
-    if (local.y > 0.1 && Math.abs(local.x) > 0.2) {
-      return local.x < 0 ? 'leftEye' : 'rightEye';
+    // Convert the world hit to the skull group's local space so the resulting
+    // point is stable as the parent group rotates or translates.
+    const groupLocal = scene.skull.worldToLocal(hit.point.clone());
+    const hitLocal = { x: groupLocal.x, y: groupLocal.y, z: groupLocal.z };
+
+    if (part === 'jaw') return { skullPart: 'jaw', hitLocal };
+
+    // Map hit position onto the head: left vs right eye region vs rest.
+    // Eye region: upper-front quadrant of the head mesh.
+    const meshLocal = hit.object.worldToLocal(hit.point.clone());
+    if (meshLocal.y > 0.1 && Math.abs(meshLocal.x) > 0.2) {
+      return {
+        skullPart: meshLocal.x < 0 ? 'leftEye' : 'rightEye',
+        hitLocal,
+      };
     }
-    return 'other';
+    return { skullPart: 'other', hitLocal };
   }
 
   canvas.addEventListener('pointermove', onPointerMove);

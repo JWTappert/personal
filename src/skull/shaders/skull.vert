@@ -7,6 +7,7 @@ uniform float uClickPulse;
 varying vec3 vNormal;
 varying vec3 vPosition;
 varying float vDisplace;
+varying vec3 vWorldPos;
 
 // Cheap 3D hash
 float hash(vec3 p) {
@@ -31,17 +32,19 @@ void main() {
   vNormal = normalize(normalMatrix * normal);
   vPosition = position;
 
-  // Scroll deconstruction: fragments drift outward along normal
-  vec3 displaced = position + normal * (uScroll * 4.0);
+  // Start with the undisplaced position; scroll no longer drives geometry —
+  // the fragment shader handles scroll via palette shift + dissolve.
+  vec3 displaced = position;
 
   // Idle decay twitch
   float twitch = noise(position * 0.3 + uTime * 0.5 + uNoiseSeed) - 0.5;
   displaced += normal * twitch * uDecayLevel * 0.6;
 
-  // Click pulse: outward spike that decays
+  // Click pulse: outward spike that decays (for head/crown clicks)
   displaced += normal * uClickPulse * 2.0;
 
-  vDisplace = uScroll + uDecayLevel * 0.5 + uClickPulse;
+  vDisplace = uDecayLevel * 0.5 + uClickPulse;
 
+  vWorldPos = (modelMatrix * vec4(displaced, 1.0)).xyz;
   gl_Position = projectionMatrix * modelViewMatrix * vec4(displaced, 1.0);
 }

@@ -100,10 +100,27 @@ async function boot() {
   const composer = createComposer(scene);
 
   const bus = createInteractions(canvas, scene);
-  let clickPulse = 0;
-  bus.on('click', ({ skullPart }) => {
+
+  // Click state: each part has a distinct reaction.
+  let clickPulse = 0;      // vertex-outward pulse (crown/other clicks)
+  let ringEffect = 0;      // expanding shader ring for eye clicks
+  let jawDrop = 0;         // jaw mesh translation magnitude
+  const clickPoint = { x: 0, y: 0, z: 0 };
+
+  bus.on('click', ({ skullPart, hitLocal }) => {
     console.log('[click]', skullPart);
-    clickPulse = 1;
+    if (hitLocal) {
+      clickPoint.x = hitLocal.x;
+      clickPoint.y = hitLocal.y;
+      clickPoint.z = hitLocal.z;
+    }
+    if (skullPart === 'jaw') {
+      jawDrop = 1;
+    } else if (skullPart === 'leftEye' || skullPart === 'rightEye') {
+      ringEffect = 1;
+    } else {
+      clickPulse = 1;
+    }
   });
 
   // Three burst slots with distinct personalities.
@@ -132,21 +149,41 @@ async function boot() {
     const dt = Math.min(0.1, (now - lastFrame) / 1000);
     lastFrame = now;
 
-    uniforms.uTime.value = scene.getTime();
-    scene.skull.rotation.y += 0.003;
+    const t = scene.getTime();
+    uniforms.uTime.value = t;
 
-    // Parallax (cursor magnetism)
+    // Lazy eye tracking: the skull drifts toward facing the cursor over
+    // ~2.8 seconds. A slow sine wobble adds a "distracted" feel so it never
+    // perfectly centers even when the cursor holds still.
     const cursorState = bus.getCursor();
     uniforms.uCursor.value.set(cursorState.x, cursorState.y);
-    scene.skull.rotation.x = cursorState.y * 0.1;
-    scene.skull.position.x = cursorState.x * 0.3;
+    const wobbleX = Math.sin(t * 0.23) * 0.14;
+    const wobbleY = Math.cos(t * 0.19) * 0.07;
+    const targetYaw = cursorState.x * 0.7 + wobbleX;
+    const targetPitch = -cursorState.y * 0.3 + wobbleY;
+    const tau = 2.8;
+    const rate = 1 - Math.exp(-dt / tau);
+    scene.skull.rotation.y += (targetYaw - scene.skull.rotation.y) * rate;
+    scene.skull.rotation.x += (targetPitch - scene.skull.rotation.x) * rate;
+    scene.skull.position.x = cursorState.x * 0.15;
 
-    // Scroll deconstruction
+    // Scroll palette + dissolve (fragment shader handles both)
     uniforms.uScroll.value = bus.getScroll();
 
-    // Click pulse decay (1.2s to zero)
+    // Click pulse decay (1.2s to zero) — outward vertex spike for crown/other clicks
     clickPulse = Math.max(0, clickPulse - dt / 1.2);
     uniforms.uClickPulse.value = clickPulse;
+
+    // Ring effect decay (~1s) — expanding bright ring for eye clicks
+    ringEffect = Math.max(0, ringEffect - dt / 1.0);
+    uniforms.uRingEffect.value = ringEffect;
+    uniforms.uClickPoint.value.set(clickPoint.x, clickPoint.y, clickPoint.z);
+
+    // Jaw drop decay (~0.8s) — independent jaw mesh translation
+    jawDrop = Math.max(0, jawDrop - dt / 0.8);
+    if (scene.jaw) {
+      scene.jaw.position.y = scene.jawRestPosition.y - 0.6 * jawDrop;
+    }
 
     composer.setSlot(0, ambientBurst.tick(dt));
     composer.setSlot(1, burstA.tick(dt));

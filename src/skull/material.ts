@@ -8,6 +8,8 @@ export interface SkullUniforms {
   uDecayLevel: { value: number };
   uScroll: { value: number };
   uClickPulse: { value: number };
+  uClickPoint: { value: THREE.Vector3 };
+  uRingEffect: { value: number };
   uCursor: { value: THREE.Vector2 };
   uUnlocked: { value: boolean };
 }
@@ -22,6 +24,8 @@ export function createSkullMaterial(noiseSeed: number): {
     uDecayLevel: { value: 0 },
     uScroll: { value: 0 },
     uClickPulse: { value: 0 },
+    uClickPoint: { value: new THREE.Vector3(0, 0, 0) },
+    uRingEffect: { value: 0 },
     uCursor: { value: new THREE.Vector2(0, 0) },
     uUnlocked: { value: false },
   };
