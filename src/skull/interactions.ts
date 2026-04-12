@@ -21,16 +21,30 @@ export interface InteractionBus {
   getCursor(): { x: number; y: number; edgeProximity: number };
   getScroll(): number;
   getLastInputTime(): number;
+  getOrbit(): { x: number; y: number };
+  isDragging(): boolean;
+  isTouch(): boolean;
 }
+
+const clampPitch = (v: number) => Math.max(-0.6, Math.min(0.6, v));
 
 export function createInteractions(
   canvas: HTMLCanvasElement,
-  scene: SceneHandle
+  scene: SceneHandle,
+  getCurrentLook: () => { yaw: number; pitch: number } = () => ({ yaw: 0, pitch: 0 })
 ): InteractionBus {
   const listeners = new Map<keyof InteractionEventMap, Set<Listener<any>>>();
   let cursor = { x: 0, y: 0, edgeProximity: 0 };
   let scroll = 0;
   let lastInput = performance.now();
+
+  const orbit = { x: 0, y: 0 };
+  let isTouchDevice = false;
+  let dragging = false;
+  let dragStartClientX = 0;
+  let dragStartClientY = 0;
+  let dragStartYaw = 0;
+  let dragStartPitch = 0;
 
   function emit<K extends keyof InteractionEventMap>(
     event: K,
@@ -42,7 +56,36 @@ export function createInteractions(
     for (const cb of set) cb(payload);
   }
 
+  function onPointerDown(e: PointerEvent) {
+    if (e.pointerType !== 'touch') return;
+    isTouchDevice = true;
+    dragging = true;
+    dragStartClientX = e.clientX;
+    dragStartClientY = e.clientY;
+    const current = getCurrentLook();
+    dragStartYaw = current.yaw;
+    dragStartPitch = current.pitch;
+    orbit.x = current.yaw;
+    orbit.y = current.pitch;
+    lastInput = performance.now();
+  }
+
+  function onPointerUp(e: PointerEvent) {
+    if (e.pointerType !== 'touch') return;
+    dragging = false;
+  }
+
   function onPointerMove(e: PointerEvent) {
+    if (dragging && e.pointerType === 'touch') {
+      const rect = canvas.getBoundingClientRect();
+      const dx = (e.clientX - dragStartClientX) / rect.width;
+      const dy = (e.clientY - dragStartClientY) / rect.height;
+      orbit.x = dragStartYaw + dx * 2.0;
+      orbit.y = clampPitch(dragStartPitch + dy * 1.5);
+      lastInput = performance.now();
+      return;
+    }
+
     const rect = canvas.getBoundingClientRect();
     const nx = ((e.clientX - rect.left) / rect.width) * 2 - 1;
     const ny = -(((e.clientY - rect.top) / rect.height) * 2 - 1);
@@ -106,7 +149,10 @@ export function createInteractions(
     return { skullPart: 'other', hitLocal };
   }
 
+  canvas.addEventListener('pointerdown', onPointerDown);
   canvas.addEventListener('pointermove', onPointerMove);
+  canvas.addEventListener('pointerup', onPointerUp);
+  canvas.addEventListener('pointercancel', onPointerUp);
   canvas.addEventListener('wheel', onWheel, { passive: false });
   canvas.addEventListener('click', onClick);
 
@@ -127,5 +173,8 @@ export function createInteractions(
     getLastInputTime() {
       return lastInput;
     },
+    getOrbit() { return { ...orbit }; },
+    isDragging() { return dragging; },
+    isTouch() { return isTouchDevice; },
   };
 }

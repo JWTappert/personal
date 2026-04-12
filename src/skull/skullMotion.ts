@@ -10,6 +10,10 @@ export interface SkullMotionHandle {
   /** Additive jaw-open offset in radians. Stored; read by skull.ts jaw composition. */
   setJawOffset(radians: number): void;
   getJawOffset(): number;
+  /** Current smoothed yaw (after lerp), in radians. */
+  getYaw(): number;
+  /** Current smoothed pitch (after lerp), in radians. */
+  getPitch(): number;
   /** Start a short damped head-shake animation overlaid on the current yaw. */
   triggerShake(): void;
   /** Apply the current look target to the scene (lerped) this frame. */
@@ -54,6 +58,12 @@ export function createSkullMotion(scene: SceneHandle): SkullMotionHandle {
     },
     getJawOffset() {
       return jawOffset;
+    },
+    getYaw() {
+      return yaw;
+    },
+    getPitch() {
+      return pitch;
     },
     triggerShake() {
       shakeAge = 0;

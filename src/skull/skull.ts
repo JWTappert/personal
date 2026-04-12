@@ -113,8 +113,11 @@ async function boot() {
 
   const composer = createComposer(scene);
 
-  const bus = createInteractions(canvas, scene);
   const skullMotion = createSkullMotion(scene);
+  const bus = createInteractions(canvas, scene, () => ({
+    yaw: skullMotion.getYaw(),
+    pitch: skullMotion.getPitch(),
+  }));
   const idle = createIdleBehavior(bus, skullMotion);
 
   const puzzle = createPuzzle(bus, idle);
@@ -219,7 +222,10 @@ async function boot() {
     // idle scheduler (inside idle.tick) is driving skullMotion instead.
     const cursorState = bus.getCursor();
     uniforms.uCursor.value.set(cursorState.x, cursorState.y);
-    if (!idle.isActive()) {
+    if (bus.isDragging()) {
+      const orbit = bus.getOrbit();
+      skullMotion.lookAt(orbit.x, orbit.y);
+    } else if (!idle.isActive()) {
       const wobbleX = Math.sin(t * 0.23) * 0.14;
       const wobbleY = Math.cos(t * 0.19) * 0.07;
       const targetYaw = cursorState.x * 0.7 + wobbleX;
@@ -227,7 +233,7 @@ async function boot() {
       skullMotion.lookAt(targetYaw, targetPitch);
     }
     skullMotion.tick(dt);
-    scene.skull.position.x = cursorState.x * 0.15;
+    scene.skull.position.x = bus.isTouch() ? 0 : cursorState.x * 0.15;
 
     // Scroll drives the jaw hinge directly. Max ~32 degrees open at full scroll.
     // The idle scheduler adds a transient "talk" offset via skullMotion.
