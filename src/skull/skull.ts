@@ -214,12 +214,18 @@ async function boot() {
     jitter: 0,
   };
 
-  // Action playback state — tracks whether an action was playing last frame
-  // so we can call syncTo when it finishes.
-  let actionWasPlaying = false;
-
   // Resting scale factor (applied in both normal and action paths)
   const RESTING_SCALE = 0.6;
+
+  // Action blend factor: 0 = pure normal, 1 = pure action. Ramps smoothly
+  // so actions ease in/out instead of snapping on/off.
+  let actionBlend = 0;
+  const ACTION_BLEND_IN = 0.25;   // seconds to ramp 0→1
+  const ACTION_BLEND_OUT = 0.30;  // seconds to ramp 1→0
+
+  function smoothstep(t: number): number {
+    return t * t * (3 - 2 * t);
+  }
 
   let lastFrame = performance.now();
   function frame(now: number) {
@@ -235,47 +241,56 @@ async function boot() {
     const actionFrame = !reducedMotion ? idle.getActionFrame() : null;
     const actionPlaying = !reducedMotion ? idle.isActionPlaying() : false;
 
+    // Ramp action blend toward 1 while playing, toward 0 otherwise.
+    if (actionPlaying) {
+      actionBlend = Math.min(1, actionBlend + dt / ACTION_BLEND_IN);
+    } else {
+      actionBlend = Math.max(0, actionBlend - dt / ACTION_BLEND_OUT);
+    }
+    const blend = smoothstep(actionBlend);
+
     const cursorState = bus.getCursor();
     uniforms.uCursor.value.set(cursorState.x, cursorState.y);
 
-    if (actionPlaying && actionFrame) {
-      // Action override path: write rotation/position/scale directly,
-      // bypassing skullMotion's lerp integrator.
+    // Always run the normal look-target path so skullMotion's integrator
+    // stays warm. When blend > 0 the action overrides the final output, but
+    // skullMotion keeps tracking so handoff back to normal is seamless.
+    if (bus.isDragging()) {
+      const orbit = bus.getOrbit();
+      skullMotion.lookAt(orbit.x, orbit.y);
+    } else if (!idle.isActive()) {
+      const wobbleX = reducedMotion ? 0 : Math.sin(t * 0.23) * 0.14;
+      const wobbleY = reducedMotion ? 0 : Math.cos(t * 0.19) * 0.07;
+      const targetYaw = cursorState.x * 0.7 + wobbleX;
+      const targetPitch = -cursorState.y * 0.3 + wobbleY;
+      skullMotion.lookAt(targetYaw, targetPitch);
+    }
+    skullMotion.tick(dt);
+
+    // skullMotion just wrote "normal" rotation into scene.skull.rotation.
+    // Read it as the baseline, then blend action overrides on top.
+    const normalRotY = scene.skull.rotation.y;
+    const normalRotX = scene.skull.rotation.x;
+    const normalPosX = bus.isTouch() ? 0 : cursorState.x * 0.15;
+
+    if (blend > 0 && actionFrame) {
+      // Rotation: blend from skullMotion output toward action target
       if (actionFrame.rotation !== null) {
-        scene.skull.rotation.y = actionFrame.rotation.yaw;
-        scene.skull.rotation.x = actionFrame.rotation.pitch;
+        scene.skull.rotation.y = normalRotY + (actionFrame.rotation.yaw - normalRotY) * blend;
+        scene.skull.rotation.x = normalRotX + (actionFrame.rotation.pitch - normalRotX) * blend;
       }
-      scene.skull.position.x = actionFrame.positionOffset.x;
-      scene.skull.position.y = actionFrame.positionOffset.y;
-      scene.skull.position.z = actionFrame.positionOffset.z;
-      scene.skull.scale.setScalar(RESTING_SCALE * actionFrame.scaleFactor);
-      // Do NOT call skullMotion.tick(dt) — motion state is frozen during action.
+      // Position: action offsets fade in/out; normal x parallax fades inversely
+      scene.skull.position.x = normalPosX * (1 - blend) + actionFrame.positionOffset.x * blend;
+      scene.skull.position.y = actionFrame.positionOffset.y * blend;
+      scene.skull.position.z = actionFrame.positionOffset.z * blend;
+      // Scale: blend between resting and action scale
+      scene.skull.scale.setScalar(RESTING_SCALE * (1 + (actionFrame.scaleFactor - 1) * blend));
     } else {
-      // Normal path: lazy-eye cursor tracking + skullMotion lerp.
-      if (bus.isDragging()) {
-        const orbit = bus.getOrbit();
-        skullMotion.lookAt(orbit.x, orbit.y);
-      } else if (!idle.isActive()) {
-        const wobbleX = reducedMotion ? 0 : Math.sin(t * 0.23) * 0.14;
-        const wobbleY = reducedMotion ? 0 : Math.cos(t * 0.19) * 0.07;
-        const targetYaw = cursorState.x * 0.7 + wobbleX;
-        const targetPitch = -cursorState.y * 0.3 + wobbleY;
-        skullMotion.lookAt(targetYaw, targetPitch);
-      }
-      skullMotion.tick(dt);
-      scene.skull.position.x = bus.isTouch() ? 0 : cursorState.x * 0.15;
-      // Reset position.y, position.z and scale in case a prior action modified them.
+      scene.skull.position.x = normalPosX;
       scene.skull.position.y = 0;
       scene.skull.position.z = 0;
       scene.skull.scale.setScalar(RESTING_SCALE);
     }
-
-    // Sync skullMotion internal state when an action finishes, so the lerp
-    // integrator doesn't snap back to stale targets.
-    if (actionWasPlaying && !actionPlaying) {
-      skullMotion.syncTo(scene.skull.rotation.y, scene.skull.rotation.x);
-    }
-    actionWasPlaying = actionPlaying;
 
     // Scroll drives the jaw hinge directly. Max ~32 degrees open at full scroll.
     // The idle scheduler adds a transient "talk" offset via skullMotion.
@@ -283,15 +298,14 @@ async function boot() {
     // Jaw click bonus decays over ~0.6s
     jawClickBonus = Math.max(0, jawClickBonus - dt / 0.6);
     if (scene.jawPivot) {
-      if (actionPlaying && actionFrame && actionFrame.jawAngle !== null) {
-        // Action drives the jaw directly.
-        scene.jawPivot.rotation.x = actionFrame.jawAngle;
+      const scrollAngle = scroll * 0.55;
+      const bonusAngle = jawClickBonus * 0.25;
+      const talkOffset = skullMotion.getJawOffset();
+      const normalJaw = Math.min(0.8, scrollAngle + bonusAngle + talkOffset);
+      if (blend > 0 && actionFrame && actionFrame.jawAngle !== null) {
+        scene.jawPivot.rotation.x = normalJaw + (actionFrame.jawAngle - normalJaw) * blend;
       } else {
-        // Normal scroll + bonus + talk composition.
-        const scrollAngle = scroll * 0.55;
-        const bonusAngle = jawClickBonus * 0.25;
-        const talkOffset = skullMotion.getJawOffset();
-        scene.jawPivot.rotation.x = Math.min(0.8, scrollAngle + bonusAngle + talkOffset);
+        scene.jawPivot.rotation.x = normalJaw;
       }
     }
 
