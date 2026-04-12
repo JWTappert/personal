@@ -16,17 +16,17 @@ export interface IdleActionsHandle {
   isPlaying(): boolean;
 }
 
-// Chomp tuning
-const AIM_DURATION = 0.2;
-const LUNGE_DURATION = 0.15;
-const CHOMP_OPEN_DURATION = 0.04;
-const CHOMP_CLOSE_DURATION = 0.11;
-const HOLD_DURATION = 0.1;
-const RETREAT_DURATION = 0.4;
+// Chomp tuning — skull advances forward over ADVANCE_DURATION with
+// 2-4 bite arcs, then retreats. Each bite bobs the skull up and opens
+// the jaw in sync, creating a "chomping forward" motion.
+const ADVANCE_DURATION = 1.2;
+const CHOMP_RETREAT_DURATION = 0.4;
 const LUNGE_Z_MIN = 2;
 const LUNGE_Z_MAX = 3;
-const LUNGE_SCALE = 1.2;  // multiplier over resting (0.6 * 1.2 = 0.72)
-const CHOMP_JAW_ANGLE = 0.6;
+const LUNGE_SCALE = 1.2;          // peak scale multiplier over resting
+const CHOMP_JAW_ANGLE = 0.6;      // peak jaw open per bite (rad)
+const CHOMP_ARC_HEIGHT = 0.3;     // y-bob amplitude per bite
+const CHOMP_PITCH_WOBBLE = 0.15;  // pitch nod per bite (nose-up on rise)
 
 // Spin tuning
 const WINDUP_DURATION = 0.2;
@@ -52,7 +52,7 @@ interface SpinState {
   settleStartYaw: number;
 }
 
-type ChompPhase = 'aim' | 'lunge' | 'chomp-open' | 'chomp-close' | 'hold' | 'retreat';
+type ChompPhase = 'advance' | 'retreat';
 
 interface ChompState {
   type: 'chomp';
@@ -62,13 +62,7 @@ interface ChompState {
   targetYaw: number;
   targetPitch: number;
   lungeZ: number;
-  chompsLeft: number;
-  chompTotal: number;
-  /** 0..1 progress through current phase */
-  currentYaw: number;
-  currentPitch: number;
-  currentZ: number;
-  currentScale: number;
+  chompCount: number;
 }
 
 type ActionState = ChompState | SpinState | null;
@@ -86,117 +80,67 @@ function easeIn(t: number): number {
 export function createIdleActions(): IdleActionsHandle {
   let state: ActionState = null;
 
-  function advanceChompPhase(s: ChompState): void {
-    switch (s.phase) {
-      case 'aim':
-        s.phase = 'lunge';
-        s.age = 0;
-        s.phaseDuration = LUNGE_DURATION;
-        break;
-      case 'lunge':
-        s.phase = 'chomp-open';
-        s.age = 0;
-        s.phaseDuration = CHOMP_OPEN_DURATION * (0.8 + Math.random() * 0.4);
-        break;
-      case 'chomp-open':
-        s.phase = 'chomp-close';
-        s.age = 0;
-        s.phaseDuration = CHOMP_CLOSE_DURATION * (0.8 + Math.random() * 0.4);
-        break;
-      case 'chomp-close':
-        s.chompsLeft -= 1;
-        if (s.chompsLeft > 0) {
-          s.phase = 'chomp-open';
-          s.age = 0;
-          s.phaseDuration = CHOMP_OPEN_DURATION * (0.8 + Math.random() * 0.4);
-        } else {
-          s.phase = 'hold';
-          s.age = 0;
-          s.phaseDuration = HOLD_DURATION;
-        }
-        break;
-      case 'hold':
-        s.phase = 'retreat';
-        s.age = 0;
-        s.phaseDuration = RETREAT_DURATION;
-        break;
-      case 'retreat':
-        state = null;  // done
-        break;
-    }
-  }
-
   function tickChomp(s: ChompState, dt: number): IdleActionFrame {
     s.age += dt;
     const progress = Math.min(1, s.age / s.phaseDuration);
 
+    // Phase transition
     if (s.age >= s.phaseDuration) {
-      advanceChompPhase(s);
+      if (s.phase === 'advance') {
+        s.phase = 'retreat';
+        s.age = 0;
+        s.phaseDuration = CHOMP_RETREAT_DURATION;
+      } else {
+        state = null; // done
+      }
     }
 
-    switch (s.phase) {
-      case 'aim': {
-        // Lerp toward target rapidly
-        const t = easeOut(progress);
-        s.currentYaw = s.targetYaw * t;
-        s.currentPitch = s.targetPitch * t;
-        return {
-          rotation: { yaw: s.currentYaw, pitch: s.currentPitch },
-          positionOffset: { x: 0, y: 0, z: 0 },
-          scaleFactor: 1,
-          jawAngle: null,
-        };
+    if (s.phase === 'advance') {
+      // Smooth forward progression over the full advance
+      const zT = easeOut(progress);
+      const z = s.lungeZ * zT;
+      const scale = 1 + (LUNGE_SCALE - 1) * zT;
+
+      // Aim toward cursor: completes in the first third of the advance
+      const aimT = easeOut(Math.min(1, progress * 3));
+      const yaw = s.targetYaw * aimT;
+      const basePitch = s.targetPitch * aimT;
+
+      // Per-chomp arc: each bite bobs the skull up and opens the jaw
+      const chompPhase = (progress * s.chompCount) % 1; // 0..1 within each bite
+      const arcY = CHOMP_ARC_HEIGHT * Math.sin(Math.PI * chompPhase);
+      const pitchNod = -CHOMP_PITCH_WOBBLE * Math.sin(Math.PI * chompPhase);
+
+      // Jaw: opens during arc rise, snaps shut on arc fall
+      let jaw: number;
+      if (chompPhase < 0.45) {
+        jaw = CHOMP_JAW_ANGLE * easeIn(chompPhase / 0.45);
+      } else if (chompPhase < 0.55) {
+        jaw = CHOMP_JAW_ANGLE; // brief hold at peak
+      } else {
+        jaw = CHOMP_JAW_ANGLE * (1 - easeOut((chompPhase - 0.55) / 0.45));
       }
-      case 'lunge': {
-        const t = easeIn(progress);
-        s.currentZ = s.lungeZ * t;
-        s.currentScale = 1 + (LUNGE_SCALE - 1) * t;
-        return {
-          rotation: { yaw: s.currentYaw, pitch: s.currentPitch },
-          positionOffset: { x: 0, y: 0, z: s.currentZ },
-          scaleFactor: s.currentScale,
-          jawAngle: null,
-        };
-      }
-      case 'chomp-open': {
-        const t = easeIn(progress);
-        // Vary amplitude slightly per chomp (90-110% of base)
-        const amp = CHOMP_JAW_ANGLE * (0.9 + Math.random() * 0.2);
-        return {
-          rotation: { yaw: s.currentYaw, pitch: s.currentPitch },
-          positionOffset: { x: 0, y: 0, z: s.currentZ },
-          scaleFactor: s.currentScale,
-          jawAngle: amp * t,
-        };
-      }
-      case 'chomp-close': {
-        const t = easeOut(progress);
-        return {
-          rotation: { yaw: s.currentYaw, pitch: s.currentPitch },
-          positionOffset: { x: 0, y: 0, z: s.currentZ },
-          scaleFactor: s.currentScale,
-          jawAngle: CHOMP_JAW_ANGLE * (1 - t),
-        };
-      }
-      case 'hold':
-        return {
-          rotation: { yaw: s.currentYaw, pitch: s.currentPitch },
-          positionOffset: { x: 0, y: 0, z: s.currentZ },
-          scaleFactor: s.currentScale,
-          jawAngle: 0,
-        };
-      case 'retreat': {
-        const t = easeOut(progress);
-        return {
-          rotation: { yaw: s.currentYaw * (1 - t), pitch: s.currentPitch * (1 - t) },
-          positionOffset: { x: 0, y: 0, z: s.currentZ * (1 - t) },
-          scaleFactor: 1 + (s.currentScale - 1) * (1 - t),
-          jawAngle: null,
-        };
-      }
+
+      // Deterministic per-chomp amplitude variation (avoids jittery per-frame random)
+      const chompIndex = Math.floor(progress * s.chompCount);
+      jaw *= 0.85 + 0.3 * ((Math.sin(chompIndex * 2.7 + 0.5) + 1) / 2);
+
+      return {
+        rotation: { yaw, pitch: basePitch + pitchNod },
+        positionOffset: { x: 0, y: arcY, z },
+        scaleFactor: scale,
+        jawAngle: jaw,
+      };
     }
-    // Fallback (shouldn't reach)
-    return { rotation: null, positionOffset: { x: 0, y: 0, z: 0 }, scaleFactor: 1, jawAngle: null };
+
+    // Retreat: ease everything back to resting
+    const t = easeOut(progress);
+    return {
+      rotation: { yaw: s.targetYaw * (1 - t), pitch: s.targetPitch * (1 - t) },
+      positionOffset: { x: 0, y: 0, z: s.lungeZ * (1 - t) },
+      scaleFactor: 1 + (LUNGE_SCALE - 1) * (1 - t),
+      jawAngle: null,
+    };
   }
 
   function tickSpin(s: SpinState, dt: number): IdleActionFrame {
@@ -272,22 +216,15 @@ export function createIdleActions(): IdleActionsHandle {
   return {
     triggerChomp(cursorX, cursorY) {
       if (state !== null) return false;
-      const chompCount = 2 + Math.floor(Math.random() * 3); // 2..4
-      const lungeZ = LUNGE_Z_MIN + Math.random() * (LUNGE_Z_MAX - LUNGE_Z_MIN);
       state = {
         type: 'chomp',
-        phase: 'aim',
+        phase: 'advance',
         age: 0,
-        phaseDuration: AIM_DURATION,
+        phaseDuration: ADVANCE_DURATION,
         targetYaw: cursorX * 0.7,
         targetPitch: -cursorY * 0.3,
-        lungeZ,
-        chompsLeft: chompCount,
-        chompTotal: chompCount,
-        currentYaw: 0,
-        currentPitch: 0,
-        currentZ: 0,
-        currentScale: 1,
+        lungeZ: LUNGE_Z_MIN + Math.random() * (LUNGE_Z_MAX - LUNGE_Z_MIN),
+        chompCount: 2 + Math.floor(Math.random() * 3), // 2..4
       };
       return true;
     },
