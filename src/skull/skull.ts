@@ -110,6 +110,8 @@ async function boot() {
     return;
   }
 
+  const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
   const noiseSeed = Math.random() * 1000;
   const { material, uniforms } = createSkullMaterial(noiseSeed);
 
@@ -220,7 +222,7 @@ async function boot() {
     const t = scene.getTime();
     uniforms.uTime.value = t;
 
-    idle.tick(dt);
+    if (!reducedMotion) idle.tick(dt);
 
     // Lazy eye tracking: cursor driver feeds skullMotion with a target based
     // on cursor position plus a slow wobble. When the cursor is idle, the
@@ -257,9 +259,11 @@ async function boot() {
     uniforms.uRingEffect.value = ringEffect;
     uniforms.uClickPoint.value.set(clickPoint.x, clickPoint.y, clickPoint.z);
 
-    composer.setSlot(0, ambientBurst.tick(dt));
-    composer.setSlot(1, burstA.tick(dt));
-    composer.setSlot(2, burstB.tick(dt));
+    if (!reducedMotion) {
+      composer.setSlot(0, ambientBurst.tick(dt));
+      composer.setSlot(1, burstA.tick(dt));
+      composer.setSlot(2, burstB.tick(dt));
+    }
 
     const idleBurst = idle.getGlitchBurst();
     if (prevIdleBurst <= 0 && idleBurst > 0) {
@@ -273,7 +277,7 @@ async function boot() {
     }
     idleGlitchInst.intensity = idleBurst;
     prevIdleBurst = idleBurst;
-    composer.setSlot(3, idleGlitchInst);
+    if (!reducedMotion) composer.setSlot(3, idleGlitchInst);
 
     composer.render();
     hud.tick(t);
