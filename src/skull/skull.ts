@@ -214,6 +214,13 @@ async function boot() {
     jitter: 0,
   };
 
+  // Action playback state — tracks whether an action was playing last frame
+  // so we can call syncTo when it finishes.
+  let actionWasPlaying = false;
+
+  // Resting scale factor (applied in both normal and action paths)
+  const RESTING_SCALE = 0.6;
+
   let lastFrame = performance.now();
   function frame(now: number) {
     const dt = Math.min(0.1, (now - lastFrame) / 1000);
@@ -224,23 +231,51 @@ async function boot() {
 
     if (!reducedMotion) idle.tick(dt);
 
-    // Lazy eye tracking: cursor driver feeds skullMotion with a target based
-    // on cursor position plus a slow wobble. When the cursor is idle, the
-    // idle scheduler (inside idle.tick) is driving skullMotion instead.
+    // Read action state (gated on reducedMotion: no actions during reduced motion)
+    const actionFrame = !reducedMotion ? idle.getActionFrame() : null;
+    const actionPlaying = !reducedMotion ? idle.isActionPlaying() : false;
+
     const cursorState = bus.getCursor();
     uniforms.uCursor.value.set(cursorState.x, cursorState.y);
-    if (bus.isDragging()) {
-      const orbit = bus.getOrbit();
-      skullMotion.lookAt(orbit.x, orbit.y);
-    } else if (!idle.isActive()) {
-      const wobbleX = reducedMotion ? 0 : Math.sin(t * 0.23) * 0.14;
-      const wobbleY = reducedMotion ? 0 : Math.cos(t * 0.19) * 0.07;
-      const targetYaw = cursorState.x * 0.7 + wobbleX;
-      const targetPitch = -cursorState.y * 0.3 + wobbleY;
-      skullMotion.lookAt(targetYaw, targetPitch);
+
+    if (actionPlaying && actionFrame) {
+      // Action override path: write rotation/position/scale directly,
+      // bypassing skullMotion's lerp integrator.
+      if (actionFrame.rotation !== null) {
+        scene.skull.rotation.y = actionFrame.rotation.yaw;
+        scene.skull.rotation.x = actionFrame.rotation.pitch;
+      }
+      scene.skull.position.x = actionFrame.positionOffset.x;
+      scene.skull.position.y = actionFrame.positionOffset.y;
+      scene.skull.position.z = actionFrame.positionOffset.z;
+      scene.skull.scale.setScalar(RESTING_SCALE * actionFrame.scaleFactor);
+      // Do NOT call skullMotion.tick(dt) — motion state is frozen during action.
+    } else {
+      // Normal path: lazy-eye cursor tracking + skullMotion lerp.
+      if (bus.isDragging()) {
+        const orbit = bus.getOrbit();
+        skullMotion.lookAt(orbit.x, orbit.y);
+      } else if (!idle.isActive()) {
+        const wobbleX = reducedMotion ? 0 : Math.sin(t * 0.23) * 0.14;
+        const wobbleY = reducedMotion ? 0 : Math.cos(t * 0.19) * 0.07;
+        const targetYaw = cursorState.x * 0.7 + wobbleX;
+        const targetPitch = -cursorState.y * 0.3 + wobbleY;
+        skullMotion.lookAt(targetYaw, targetPitch);
+      }
+      skullMotion.tick(dt);
+      scene.skull.position.x = bus.isTouch() ? 0 : cursorState.x * 0.15;
+      // Reset position.y, position.z and scale in case a prior action modified them.
+      scene.skull.position.y = 0;
+      scene.skull.position.z = 0;
+      scene.skull.scale.setScalar(RESTING_SCALE);
     }
-    skullMotion.tick(dt);
-    scene.skull.position.x = bus.isTouch() ? 0 : cursorState.x * 0.15;
+
+    // Sync skullMotion internal state when an action finishes, so the lerp
+    // integrator doesn't snap back to stale targets.
+    if (actionWasPlaying && !actionPlaying) {
+      skullMotion.syncTo(scene.skull.rotation.y, scene.skull.rotation.x);
+    }
+    actionWasPlaying = actionPlaying;
 
     // Scroll drives the jaw hinge directly. Max ~32 degrees open at full scroll.
     // The idle scheduler adds a transient "talk" offset via skullMotion.
@@ -248,10 +283,16 @@ async function boot() {
     // Jaw click bonus decays over ~0.6s
     jawClickBonus = Math.max(0, jawClickBonus - dt / 0.6);
     if (scene.jawPivot) {
-      const scrollAngle = scroll * 0.55;
-      const bonusAngle = jawClickBonus * 0.25;
-      const talkOffset = skullMotion.getJawOffset();
-      scene.jawPivot.rotation.x = Math.min(0.8, scrollAngle + bonusAngle + talkOffset);
+      if (actionPlaying && actionFrame && actionFrame.jawAngle !== null) {
+        // Action drives the jaw directly.
+        scene.jawPivot.rotation.x = actionFrame.jawAngle;
+      } else {
+        // Normal scroll + bonus + talk composition.
+        const scrollAngle = scroll * 0.55;
+        const bonusAngle = jawClickBonus * 0.25;
+        const talkOffset = skullMotion.getJawOffset();
+        scene.jawPivot.rotation.x = Math.min(0.8, scrollAngle + bonusAngle + talkOffset);
+      }
     }
 
     // Ring effect decay (~1s) — expanding bright ring from the click point
