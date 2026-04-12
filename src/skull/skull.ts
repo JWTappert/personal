@@ -296,9 +296,9 @@ async function boot() {
     // Layered on top of everything (including actions) so the skull never
     // feels perfectly pinned. Gated on reducedMotion.
     if (!reducedMotion) {
-      scene.skull.position.x += Math.sin(t * 0.13) * 0.15 + Math.sin(t * 0.31) * 0.08;
-      scene.skull.position.y += Math.cos(t * 0.17) * 0.12 + Math.sin(t * 0.41) * 0.06;
-      scene.skull.position.z += Math.sin(t * 0.11) * 0.10;
+      scene.skull.position.x += Math.sin(t * 0.13) * 0.35 + Math.sin(t * 0.31) * 0.15;
+      scene.skull.position.y += Math.cos(t * 0.17) * 0.25 + Math.sin(t * 0.41) * 0.12;
+      scene.skull.position.z += Math.sin(t * 0.11) * 0.20;
     }
 
     // Scroll drives the jaw hinge directly. Max ~32 degrees open at full scroll.
