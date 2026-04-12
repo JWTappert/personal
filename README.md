@@ -1,30 +1,37 @@
-This is a [Next.js](https://nextjs.org/) project bootstrapped with [`create-next-app`](https://github.com/zeit/next.js/tree/canary/packages/create-next-app).
+# skull
 
-## Getting Started
+Interactive 3D skull. One page, one experience.
 
-First, run the development server:
+Astro + vanilla Three.js, static output.
+
+## Develop
 
 ```bash
+npm install
 npm run dev
-# or
-yarn dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open http://localhost:4321.
 
-You can start editing the page by modifying `pages/index.js`. The page auto-updates as you edit the file.
+## Scripts
 
-## Learn More
+| Command | Description |
+|---|---|
+| `npm run dev` | Start the dev server with HMR |
+| `npm run build` | Produce a static build in `dist/` |
+| `npm run preview` | Serve the built `dist/` locally |
+| `npm test` | Run vitest once |
+| `npm run test:watch` | Run vitest in watch mode |
 
-To learn more about Next.js, take a look at the following resources:
+## Structure
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/zeit/next.js/) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/import?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/deployment) for more details.
+```
+src/
+  pages/index.astro   # page shell: canvas, HUD, hint flash overlay
+  skull/              # scene, shader material, post-FX, interactions,
+                      # idle motion, HUD, puzzle logic
+  shaders/            # GLSL vertex + fragment shaders (imported via ?raw)
+tests/                # vitest tests (pure puzzle logic only)
+public/
+  models/skull.obj    # skull geometry
+```

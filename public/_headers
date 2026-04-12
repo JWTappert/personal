@@ -1,0 +1,15 @@
+# Cloudflare Pages edge headers.
+# Astro emits hashed filenames for /_astro/* assets, so they can cache forever.
+# HTML should revalidate quickly so deploys go live immediately.
+
+/_astro/*
+  Cache-Control: public, max-age=31536000, immutable
+
+/models/*
+  Cache-Control: public, max-age=31536000, immutable
+
+/*.html
+  Cache-Control: public, max-age=0, must-revalidate
+
+/
+  Cache-Control: public, max-age=0, must-revalidate
