@@ -292,6 +292,15 @@ async function boot() {
       scene.skull.scale.setScalar(RESTING_SCALE);
     }
 
+    // Subtle orbital drift — slow Lissajous-like wander around the origin.
+    // Layered on top of everything (including actions) so the skull never
+    // feels perfectly pinned. Gated on reducedMotion.
+    if (!reducedMotion) {
+      scene.skull.position.x += Math.sin(t * 0.13) * 0.15 + Math.sin(t * 0.31) * 0.08;
+      scene.skull.position.y += Math.cos(t * 0.17) * 0.12 + Math.sin(t * 0.41) * 0.06;
+      scene.skull.position.z += Math.sin(t * 0.11) * 0.10;
+    }
+
     // Scroll drives the jaw hinge directly. Max ~32 degrees open at full scroll.
     // The idle scheduler adds a transient "talk" offset via skullMotion.
     const scroll = bus.getScroll();

@@ -48,7 +48,7 @@ export function createSkullMotion(scene: SceneHandle): SkullMotionHandle {
   // Shake is inactive when shakeAge >= SHAKE_DURATION. Initialized past the
   // end so nothing is shaking at startup.
   let shakeAge = SHAKE_DURATION;
-  const tau = 2.8;
+  const tau = 1.2;
 
   return {
     lookAt(x, y) {
