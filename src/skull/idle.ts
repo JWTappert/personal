@@ -158,8 +158,11 @@ export function createIdleBehavior(
         spinCooldown -= dt;
 
         if (chompCooldown <= 0) {
-          const cursor = bus.getCursor();
-          const triggered = actions.triggerChomp(cursor.x, cursor.y);
+          // Randomize chomp direction — cursor is stale during idle, so
+          // pick a random target in [-0.8, 0.8] for variety.
+          const cx = (Math.random() * 2 - 1) * 0.8;
+          const cy = (Math.random() * 2 - 1) * 0.5;
+          const triggered = actions.triggerChomp(cx, cy);
           if (triggered) {
             chompCooldown = 45 + Math.random() * 45;
             postActionCooldown = 10;
