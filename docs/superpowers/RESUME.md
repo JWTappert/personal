@@ -10,7 +10,7 @@ vanilla Three.js, deploying to Cloudflare Pages. Replacing an old Next.js site.
 
 - **Spec:** `docs/superpowers/specs/2026-04-11-skull-site-design.md`
 - **Plan:** `docs/superpowers/plans/2026-04-11-skull-site.md` (39 tasks in 12 phases)
-- **Branch:** `skull-rewrite` (60 commits ahead of `master`)
+- **Branch:** `skull-rewrite` (62 commits ahead of `master`)
 - **Working dir:** `C:\Users\tappe\Workspace\personal` (Windows, Git Bash)
 
 ## Progress
@@ -114,8 +114,17 @@ Note: `uDecayLevel` was removed in the Phase 5 rework along with the
 
 - `src/skull/skullMotion.ts` owns the skull's yaw/pitch look target and
   the exponential-lerp rotation update (tau=2.8s). API:
-  `lookAt(x, y)`, `setJawOffset(radians)`, `getJawOffset()`, `tick(dt)`.
+  `lookAt(x, y)`, `setJawOffset(radians)`, `getJawOffset()`,
+  `triggerShake()`, `tick(dt)`.
   Writes to `scene.skull.rotation` only — jaw composition stays in `skull.ts`.
+- Internal state: `yaw` and `pitch` are the source of truth for smoothed
+  orientation (NOT `scene.skull.rotation` directly). Each tick, they lerp
+  toward targets and then get pushed to `scene.skull.rotation.y/x` along
+  with any active shake offset. This lets the shake overlay modulate the
+  final rotation without corrupting the lerp integrator.
+- `triggerShake()` kicks off a damped head-shake: 600ms, 2.5 full sine
+  cycles, 0.35 rad peak amplitude, linear amplitude decay. Used in
+  `skull.ts` as "wrong click" feedback when puzzle progress drops.
 - `src/skull/idle.ts` takes `(bus, skullMotion)`. Returns `{tick, isActive,
   getGlitchBurst}`. Tracks `idleness` (0-1) that ramps up after 1s of no
   input. Runs look-around + talk schedulers when `idleness > 0.4`.
@@ -183,6 +192,9 @@ Note: `uDecayLevel` was removed in the Phase 5 rework along with the
   seconds-scale because `scene.getTime()` returns seconds.
 - Secret: `SECRET_SEQUENCE = ['leftEye', 'rightEye', 'jaw', 'rightEye', 'leftEye']`
   (5 clicks). Progress display is `LATCH X/5`.
+- `PuzzleHandle` exposes `getProgress()` in addition to the other methods —
+  `skull.ts` reads it in the click handler to detect progress resets and
+  trigger `skullMotion.triggerShake()` as "wrong click" feedback.
 - Unlock side-effects (in `skull.ts` onUnlock callback):
   - `composer.setUnlocked(true)` — disables glitch passes
   - `hud.setUnlocked(true)` — writes sticky "well played." into BR
