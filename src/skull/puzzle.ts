@@ -93,7 +93,7 @@ export function createPuzzle(bus: InteractionBus, idle: IdleHandle): PuzzleHandl
       const brLine = resolveBrLine(brRaw);
       return {
         tl: `SYS_/CRANIUM.v2\n${tlLine}`,
-        tr: `42.5°N -123.8°W\n${trLine}`,
+        tr: `45.5°N -122.7°W\n${trLine}`,
         bl: blLine,
         br: brLine,
       };
