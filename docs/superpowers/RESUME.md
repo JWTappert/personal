@@ -1,6 +1,6 @@
 # Resume Point — 2026-04-11
 
-Checkpoint after Phase 8. Written before clearing session context so a fresh
+Checkpoint after Phase 9. Written before clearing session context so a fresh
 session can pick up without re-reading every commit.
 
 ## Project
@@ -26,8 +26,8 @@ vanilla Three.js, deploying to Cloudflare Pages. Replacing an old Next.js site.
 | 6 — HUD | ✅ | `src/skull/hud.ts` + DOM/CSS in `src/pages/index.astro`. HUD color tracks skull color via `--hud-rgb` CSS variable. Always-visible (edge-reveal mechanic from the plan was iterated out). Email link in bottom-right for mobile thumb reach. |
 | 7 — Puzzle (TDD) | ✅ | `puzzle-internals.ts` (acrostic pool, sequence detector, hint formatter) with 11 vitest tests. `puzzle.ts` public module. Per-corner independent message pools; BL scrolls the acrostic; BR has reactive `{state}` / `{latch}` placeholders. |
 | 8 — Glitch hint flash | ✅ | `#hint-flash` overlay + `flashHint` method on HudHandle. Fires on idle burst rising edge when not unlocked. Positioned at `top: 75%` below the skull. |
-| 9 — Mobile touch | ⏭ **NEXT** | Plan tasks 31-32. Touch-drag orbit replacing cursor parallax; tap-to-click for puzzle. |
-| 10 — Fallbacks | ⏳ | Plan tasks 33-34. WebGL fallback + prefers-reduced-motion. |
+| 9 — Mobile touch | ✅ | Task 31 only — touch-drag orbit replaces cursor parallax. Task 32 (sustained-touch HUD reveal) skipped because the HUD is already always-visible. Tap-to-click already worked via native `click` event. See deviations below. |
+| 10 — Fallbacks | ⏭ **NEXT** | Plan tasks 33-34. WebGL fallback + prefers-reduced-motion. |
 | 11 — Deploy | ⏳ | Plan tasks 35-39. Cloudflare Pages. |
 
 ## Deviations from the plan (important for later phases)
@@ -202,6 +202,58 @@ Note: `uDecayLevel` was removed in the Phase 5 rework along with the
   - `document.documentElement.style.setProperty('--hud-rgb', '255 25 51')`
     — HUD matches shader red
 
+### Mobile touch (Phase 9)
+
+- **`skullMotion.ts`** exposes `getYaw()` / `getPitch()` returning the internal
+  smoothed orientation (NOT `scene.skull.rotation`, NOT the targets). These
+  exist so the touch-drag handler can seed from the current visual position
+  and avoid a snap-to-zero on every drag start.
+- **`interactions.ts`** takes an optional 3rd arg
+  `getCurrentLook?: () => { yaw: number; pitch: number }` (default `() => ({yaw:0, pitch:0})`).
+  `skull.ts` passes `() => ({ yaw: skullMotion.getYaw(), pitch: skullMotion.getPitch() })`.
+  Because of this, **`skullMotion` must be created before `bus`** in `skull.ts`
+  `boot()` — the original ordering had `bus` first and was swapped.
+- New bus methods: `getOrbit()`, `isDragging()`, `isTouch()`. The
+  `InteractionBus` interface declares all three.
+- Touch state in the `createInteractions` closure:
+  - `orbit = { x, y }` — current yaw/pitch target driven by drag
+  - `hadTouchInput` — one-way latch flipped on the first touch `pointerdown`,
+    never reset (intentionally — `isTouch()` reflects "this session has had
+    touch", not realtime device capability). On hybrid devices the cursor
+    `position.x` parallax stays disabled after the first touch.
+  - `dragging` flag, `dragStartClientX/Y/Yaw/Pitch` anchors
+- Drag math uses **anchored deltas** — `orbit.x = dragStartYaw + dx * SENSITIVITY`,
+  not incremental. Tuning constants are at module top:
+  ```ts
+  TOUCH_YAW_SENSITIVITY = 2.0    // full canvas-width drag → 2 rad
+  TOUCH_PITCH_SENSITIVITY = 1.5  // full canvas-height drag → 1.5 rad
+  TOUCH_PITCH_CLAMP = 0.6        // ~±34° pitch limit, yaw unbounded
+  ```
+- `onPointerMove` has an early-return touch-drag branch at the top so it does
+  NOT also fall through to the cursor ndc + `emit('pointer')` path during a
+  drag — that would feed a stale ndc into the lazy-eye target and fight the
+  orbit override.
+- `onPointerUp` is wired to both `pointerup` AND `pointercancel` so OS-level
+  interruptions (notification shade, multitask gesture) can't leave `dragging`
+  stuck `true`.
+- **`skull.ts` frame loop** branches:
+  ```ts
+  if (bus.isDragging()) {
+    skullMotion.lookAt(orbit.x, orbit.y);
+  } else if (!idle.isActive()) {
+    // existing cursor lazy-eye + wobble path, unchanged
+  }
+  // (else: idle scheduler is driving skullMotion, leave alone)
+  scene.skull.position.x = bus.isTouch() ? 0 : cursorState.x * 0.15;
+  ```
+- **Known gap:** `wheel` doesn't fire on touch, so the scroll-driven jaw
+  hinge is dead on mobile. Not addressed in Phase 9 — would require a custom
+  two-finger or pinch gesture and was out of scope for parity.
+- **Idle behavior on touch:** `idle.isActive()` ramps active after ~1s with
+  no input, so the look-around + talk scheduler runs immediately on page
+  load on a phone. The `-- IDLE --` HUD line therefore shows almost
+  permanently. Considered acceptable.
+
 ### Glitch hint flash (Phase 8)
 
 - `<div id="hint-flash">` overlay at `top: 75%` (below the skull) with
@@ -235,9 +287,9 @@ The OBJ jaw/head identification uses bounding-box Y-center (jaw has lower Y).
 
 1. Read this file first
 2. Read `docs/superpowers/plans/2026-04-11-skull-site.md` for the task list
-   (Phase 9 onward)
+   (Phase 10 onward)
 3. **Read current source files before adapting plan code** — the plan's code
-   blocks for Phases 3-8 are mostly stale. Trust the code, not the plan.
+   blocks for Phases 3-9 are mostly stale. Trust the code, not the plan.
 4. User has `npm run dev` running on `http://localhost:4321` and checks
    visually. **Do NOT start or stop the dev server** (per user's global CLAUDE.md)
 5. Use subagent-driven-development pattern: dispatch implementer per task,
@@ -246,57 +298,42 @@ The OBJ jaw/head identification uses bounding-box Y-center (jaw has lower Y).
 
 ## Where we left off
 
-Ready to start **Phase 9 — Mobile touch parity**. Plan Tasks 31-32 in
+Ready to start **Phase 10 — Fallbacks**. Plan Tasks 33-34 in
 `docs/superpowers/plans/2026-04-11-skull-site.md`.
 
-### What Phase 9 needs to deliver
+### What Phase 10 needs to deliver
 
-The desktop experience is now fully playable: lazy-eye cursor tracking, idle
-motion, glitch bursts + hint flash, persistent neon color cycling, puzzle
-with acrostic + click sequence + reactive HUD state, unlock state. Mobile
-currently doesn't work well because:
+Per the plan:
+- **Task 33** — WebGL-not-available static fallback. Add a `<div id="nogl">`
+  in `index.astro` and have `skull.ts` show it (and hide the canvas) when
+  `'WebGLRenderingContext' in window` is false. Currently `skull.ts` just
+  silently `return`s on missing WebGL — anyone without WebGL sees a black
+  page with no explanation.
+- **Task 34** — OBJ load failure fallback. Already implemented in
+  `scene.ts` (try/catch with an icosahedron stand-in). Plan says: rename
+  `public/models/skull.obj` temporarily, reload, confirm the icosahedron
+  appears, then rename back. **No code change** — just a manual
+  verification step the user has to perform.
 
-1. **No pointer parallax / lazy-eye tracking** — the cursor handler uses
-   `pointermove` which touch devices only fire during drag. The skull just
-   stares forward at idle on a phone.
-2. **Click sequence is awkward** — `click` still fires on tap, but there's
-   no visual feedback that you're "aiming" for a skull part before the click.
-3. **Idle triggers instantly** — without hover, the cursor is permanently
-   "idle" on a touch device, so the look-around + talk behavior runs
-   immediately on page load. That's actually kind of cool, but the state
-   lines show `-- IDLE --` forever.
+The plan doesn't have an explicit `prefers-reduced-motion` task, but it
+would be reasonable to add: gate the burst scheduler and the idle scheduler
+behind `window.matchMedia('(prefers-reduced-motion: reduce)').matches` and
+show only the static skull. Worth raising before starting Phase 10.
 
-### Phase 9 tasks per the plan (need to verify freshness)
+### Gotchas to watch for in Phase 10
 
-- **Task 31**: Touch-drag orbit that replaces cursor parallax on touch
-  devices. Adds `orbit: {x, y}` state to the bus, `pointerdown`/drag/up
-  handlers that only activate on `e.pointerType === 'touch'`, and updates
-  `skull.ts` frame loop to blend `bus.getCursor()` with `bus.getOrbit()`
-  based on touch mode.
-- **Task 32**: HUD always-visible on touch devices — but wait, we already
-  made HUD always visible! This task from the plan is partially moot. It
-  may still have some touch-specific changes (e.g. bigger tap targets on
-  the email link, or touch-friendly rendering). Read the plan carefully
-  and iterate.
+- `skull.ts:106` is the current early return: `if (!('WebGLRenderingContext' in window)) return;`.
+  Replace with the show-fallback / hide-canvas branch from the plan.
+- The plan's `<div id="nogl">` has a duplicated `display:none` style — the
+  comment in the plan says it's intentional (CSS sets none, JS overrides
+  to flex). Verify this still works as written or simplify.
+- For Task 34, **do the rename test on a saved working tree** — don't
+  forget to rename back. A `git status` after restoration is wise.
 
-### Gotchas to watch for in Phase 9
-
-- `createHud` doesn't read `bus` anymore — if Phase 9 adds touch detection
-  for the HUD, it might be easier to do it in CSS (`@media (hover: none)`)
-  or just via a window media query in `hud.ts`.
-- The cursor handler in `interactions.ts` emits `pointer` events on every
-  move — on touch, this only fires during drag. So the lazy-eye tracking
-  already degrades gracefully but feels dead. The touch-orbit replacement
-  should produce a similar "look at where I dragged" effect.
-- The puzzle's click detection goes through `bus.on('click', ...)` which
-  fires on both mouse click and touch tap. That part should already work.
-  Test it on a real device.
-- The plan's tasks assume `rotation.y += 0.003` auto-rotate exists; it does
-  NOT. Adapt accordingly.
-
-### Commits so far on `skull-rewrite` (60 ahead of master)
+### Commits so far on `skull-rewrite` (62 ahead of master)
 
 Roughly: scaffold → scene → material → postfx iteration → interactions
 iteration → idle motion rework → HUD → puzzle TDD → per-corner pools →
-sync fixes → Timer migration → hint flash → reactive BR polish → this
+sync fixes → Timer migration → hint flash → reactive BR polish → shake on
+puzzle reset → touch-drag orbit → tuning constants rename → this
 checkpoint. `git log --oneline master..HEAD` for the full picture.
