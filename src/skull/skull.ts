@@ -220,6 +220,7 @@ async function boot() {
   // Action blend factor: 0 = pure normal, 1 = pure action. Ramps smoothly
   // so actions ease in/out instead of snapping on/off.
   let actionBlend = 0;
+  let cachedActionFrame: import('./idleActions').IdleActionFrame | null = null;
   const ACTION_BLEND_IN = 0.25;   // seconds to ramp 0→1
   const ACTION_BLEND_OUT = 0.30;  // seconds to ramp 1→0
 
@@ -237,8 +238,12 @@ async function boot() {
 
     if (!reducedMotion) idle.tick(dt);
 
-    // Read action state (gated on reducedMotion: no actions during reduced motion)
-    const actionFrame = !reducedMotion ? idle.getActionFrame() : null;
+    // Read action state (gated on reducedMotion: no actions during reduced motion).
+    // Cache the last frame so the blend-out can fade from it after the state
+    // machine stops producing frames (otherwise position/scale snap to resting).
+    const rawActionFrame = !reducedMotion ? idle.getActionFrame() : null;
+    if (rawActionFrame) cachedActionFrame = rawActionFrame;
+    const actionFrame = rawActionFrame ?? (actionBlend > 0 ? cachedActionFrame : null);
     const actionPlaying = !reducedMotion ? idle.isActionPlaying() : false;
 
     // Ramp action blend toward 1 while playing, toward 0 otherwise.
