@@ -66,6 +66,7 @@ export class SequenceDetector {
   private buffer: string[] = [];
   private unlocked = false;
   private callbacks: Array<() => void> = [];
+  private progressCount = 0;
 
   constructor(private readonly secret: readonly string[]) {}
 
@@ -75,6 +76,19 @@ export class SequenceDetector {
     if (this.buffer.length > this.secret.length) {
       this.buffer.shift();
     }
+
+    // Strict-streak progress counter: every click either advances the
+    // counter (if it matches the next expected position) or resets it.
+    // A wrong click that happens to match secret[0] restarts at 1 instead
+    // of dropping to 0 — it's the start of a fresh attempt.
+    if (target === this.secret[this.progressCount]) {
+      this.progressCount++;
+    } else if (target === this.secret[0]) {
+      this.progressCount = 1;
+    } else {
+      this.progressCount = 0;
+    }
+
     if (this.buffer.length === this.secret.length) {
       let matches = true;
       for (let i = 0; i < this.secret.length; i++) {
@@ -88,6 +102,10 @@ export class SequenceDetector {
         for (const cb of this.callbacks) cb();
       }
     }
+  }
+
+  getProgress(): number {
+    return this.progressCount;
   }
 
   isUnlocked(): boolean {

@@ -1,4 +1,5 @@
 import type { InteractionBus } from './interactions';
+import type { IdleHandle } from './idle';
 import {
   buildAcrosticPool,
   SequenceDetector,
@@ -38,13 +39,17 @@ const TR_POOL = [
   'UPLINK 92%',
   'BEACON 3 SYNC',
 ];
+// BR pool carries two reactive placeholders alongside static flavor:
+// {state}  → resolves to '-- IDLE --' or '-- ACTIVE --'
+// {latch}  → resolves to 'LATCH X/N' showing puzzle progress toward unlock
+// Resolved in getHudLines at render time.
 const BR_POOL = [
   'PSU 12.08V',
   'FAN 2400RPM',
+  '{state}',
   'LOAD 47%',
+  '{latch}',
   'MEM 1.2GB',
-  'DISK 83%',
-  'VOLT 1.05V OK',
 ];
 
 // Seconds per rotation step. `t` comes from scene.getTime() (seconds).
@@ -54,7 +59,7 @@ const TR_INTERVAL_S = 3.1;
 const BR_INTERVAL_S = 2.8;
 const BL_INTERVAL_S = 3.5;
 
-export function createPuzzle(bus: InteractionBus): PuzzleHandle {
+export function createPuzzle(bus: InteractionBus, idle: IdleHandle): PuzzleHandle {
   const blPool = buildAcrosticPool(SECRET_WORD);
   const detector = new SequenceDetector(SECRET_SEQUENCE);
   const hint = formatGlitchHint(SECRET_SEQUENCE);
@@ -68,12 +73,23 @@ export function createPuzzle(bus: InteractionBus): PuzzleHandle {
     return pool[step % pool.length];
   }
 
+  function resolveBrLine(raw: string): string {
+    if (raw === '{state}') {
+      return idle.isActive() ? '-- IDLE --' : '-- ACTIVE --';
+    }
+    if (raw === '{latch}') {
+      return `LATCH ${detector.getProgress()}/${SECRET_SEQUENCE.length}`;
+    }
+    return raw;
+  }
+
   return {
     getHudLines(t) {
       const tlLine = pick(TL_POOL, t, TL_INTERVAL_S);
       const trLine = pick(TR_POOL, t, TR_INTERVAL_S);
       const blLine = pick(blPool, t, BL_INTERVAL_S);
-      const brLine = pick(BR_POOL, t, BR_INTERVAL_S);
+      const brRaw = pick(BR_POOL, t, BR_INTERVAL_S);
+      const brLine = resolveBrLine(brRaw);
       return {
         tl: `SYS_/CRANIUM.v2\n${tlLine}`,
         tr: `42.5°N -123.8°W\n${trLine}`,

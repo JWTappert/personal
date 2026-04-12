@@ -117,7 +117,7 @@ async function boot() {
   const skullMotion = createSkullMotion(scene);
   const idle = createIdleBehavior(bus, skullMotion);
 
-  const puzzle = createPuzzle(bus);
+  const puzzle = createPuzzle(bus, idle);
   const hudEl = document.getElementById('hud') as HTMLElement;
   const hud = createHud(hudEl, bus, puzzle);
 
