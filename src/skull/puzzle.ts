@@ -9,6 +9,7 @@ import {
 export interface PuzzleHandle {
   getHudLines(t: number): { tl: string; tr: string; bl: string; br: string };
   getGlitchHint(): string;
+  getProgress(): number;
   isUnlocked(): boolean;
   onUnlock(cb: () => void): void;
 }
@@ -99,6 +100,9 @@ export function createPuzzle(bus: InteractionBus, idle: IdleHandle): PuzzleHandl
     },
     getGlitchHint() {
       return hint;
+    },
+    getProgress() {
+      return detector.getProgress();
     },
     isUnlocked() {
       return detector.isUnlocked();

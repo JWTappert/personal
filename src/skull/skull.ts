@@ -135,6 +135,7 @@ async function boot() {
   let ringEffect = 0;               // expanding shader ring
   let jawClickBonus = 0;            // transient extra jaw opening from clicking the jaw
   let currentColorIndex = 0;        // index into CLICK_COLORS for uBaseColor
+  let prevProgress = 0;             // tracks puzzle.getProgress() across clicks
   const clickPoint = { x: 0, y: 0, z: 0 };
 
   bus.on('click', ({ skullPart, hitLocal }) => {
@@ -148,6 +149,14 @@ async function boot() {
     if (skullPart === 'jaw') {
       jawClickBonus = 1;
     }
+    // Detect puzzle progress reset (wrong click after partial correct sequence)
+    // and shake the skull as a "try again" signal. Puzzle's own click listener
+    // runs before this one (registered first) so progress is up-to-date here.
+    const progress = puzzle.getProgress();
+    if (prevProgress > 0 && progress < prevProgress && !puzzle.isUnlocked()) {
+      skullMotion.triggerShake();
+    }
+    prevProgress = progress;
     // Post-unlock: skip the color cycle. The shader ignores uBaseColor once
     // uUnlocked is true (renders red), so cycling would only desync --hud-rgb.
     if (puzzle.isUnlocked()) return;
