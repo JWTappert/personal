@@ -103,7 +103,12 @@ class BurstSlot {
 async function boot() {
   const canvas = document.getElementById('skull-canvas') as HTMLCanvasElement | null;
   if (!canvas) return;
-  if (!('WebGLRenderingContext' in window)) return;
+  if (!('WebGLRenderingContext' in window)) {
+    const nogl = document.getElementById('nogl');
+    if (nogl) nogl.classList.add('active');
+    canvas.style.display = 'none';
+    return;
+  }
 
   const noiseSeed = Math.random() * 1000;
   const { material, uniforms } = createSkullMaterial(noiseSeed);

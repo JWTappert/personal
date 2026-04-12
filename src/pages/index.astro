@@ -87,6 +87,20 @@
         0%, 100% { opacity: 0; }
         50% { opacity: 0.9; }
       }
+      #nogl {
+        display: none;
+        position: fixed;
+        inset: 0;
+        background: #000;
+        color: rgb(var(--hud-rgb));
+        align-items: center;
+        justify-content: center;
+        font-size: clamp(16px, 4vw, 22px);
+        letter-spacing: 0.2em;
+        text-transform: lowercase;
+        text-shadow: 0 0 14px rgb(var(--hud-rgb));
+      }
+      #nogl.active { display: flex; }
     </style>
   </head>
   <body>
@@ -102,6 +116,7 @@
       </div>
       <div id="hint-flash"></div>
     </div>
+    <div id="nogl">webgl required.</div>
     <script>
       import '../skull/skull.ts';
     </script>
