@@ -248,7 +248,7 @@ export function createIdleActions(): IdleActionsHandle {
         targetYaw: cursorX * 0.7,
         targetPitch: -cursorY * 0.3,
         lungeZ: LUNGE_Z_MIN + Math.random() * (LUNGE_Z_MAX - LUNGE_Z_MIN),
-        chompCount: 2 + Math.floor(Math.random() * 3), // 2..4
+        chompCount: 3,
       };
       return true;
     },
