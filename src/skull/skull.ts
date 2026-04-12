@@ -3,6 +3,7 @@ import { createSkullMaterial } from './material';
 import { createComposer, type GlitchInstance } from './postfx';
 import { createInteractions } from './interactions';
 import { createIdleBehavior } from './idle';
+import type { IdleActionFrame } from './idleActions';
 import { createSkullMotion } from './skullMotion';
 import { createHud, type PuzzleLinesProvider } from './hud';
 import { createPuzzle } from './puzzle';
@@ -220,7 +221,7 @@ async function boot() {
   // Action blend factor: 0 = pure normal, 1 = pure action. Ramps smoothly
   // so actions ease in/out instead of snapping on/off.
   let actionBlend = 0;
-  let cachedActionFrame: import('./idleActions').IdleActionFrame | null = null;
+  let cachedActionFrame: IdleActionFrame | null = null;
   const ACTION_BLEND_IN = 0.25;   // seconds to ramp 0→1
   const ACTION_BLEND_OUT = 0.30;  // seconds to ramp 1→0
 
@@ -252,7 +253,7 @@ async function boot() {
     } else {
       actionBlend = Math.max(0, actionBlend - dt / ACTION_BLEND_OUT);
     }
-    const blend = smoothstep(actionBlend);
+    const blend = actionBlend > 0 ? smoothstep(actionBlend) : 0;
 
     const cursorState = bus.getCursor();
     uniforms.uCursor.value.set(cursorState.x, cursorState.y);

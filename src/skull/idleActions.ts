@@ -49,7 +49,6 @@ interface SpinState {
   startYaw: number;
   currentYaw: number;
   currentY: number;
-  settleStartYaw: number;
 }
 
 type ChompPhase = 'advance' | 'retreat';
@@ -79,66 +78,68 @@ function easeIn(t: number): number {
   return t * t;
 }
 
+/**
+ * Asymmetric envelope for per-chomp motion. During rise (0..0.45) returns
+ * easeOut ramp; during snap (0.45..1) returns inverted easeIn ramp.
+ * Used for z-step, y-arc, and pitch nod so the split point is defined once.
+ */
+const CHOMP_SPLIT = 0.45;
+function chompEnvelope(chompPhase: number): number {
+  if (chompPhase < CHOMP_SPLIT) {
+    return easeOut(chompPhase / CHOMP_SPLIT);
+  }
+  return 1 - easeIn((chompPhase - CHOMP_SPLIT) / (1 - CHOMP_SPLIT));
+}
+
 export function createIdleActions(): IdleActionsHandle {
   let state: ActionState = null;
+
+  // Pre-allocated frame objects — mutated in-place to avoid GC churn at 60fps.
+  const chompFrame: IdleActionFrame = {
+    rotation: { yaw: 0, pitch: 0 },
+    positionOffset: { x: 0, y: 0, z: 0 },
+    scaleFactor: 1,
+    jawAngle: null,
+  };
+  const spinFrame: IdleActionFrame = {
+    rotation: { yaw: 0, pitch: 0 },
+    positionOffset: { x: 0, y: 0, z: 0 },
+    scaleFactor: 1,
+    jawAngle: null,
+  };
 
   function tickChomp(s: ChompState, dt: number): IdleActionFrame {
     s.age += dt;
     const progress = Math.min(1, s.age / s.phaseDuration);
 
-    // Phase transition
     if (s.age >= s.phaseDuration) {
       if (s.phase === 'advance') {
         s.phase = 'retreat';
         s.age = 0;
         s.phaseDuration = CHOMP_RETREAT_DURATION;
       } else {
-        state = null; // done
+        state = null;
       }
     }
 
+    const f = chompFrame;
+    if (!f.rotation) f.rotation = { yaw: 0, pitch: 0 };
+
     if (s.phase === 'advance') {
-      // Aim: lerp from starting orientation toward cursor target.
-      // Completes in the first third of the advance.
       const aimT = easeOut(Math.min(1, progress * 3));
       const yaw = s.startYaw + (s.targetYaw - s.startYaw) * aimT;
       const basePitch = s.startPitch + (s.targetPitch - s.startPitch) * aimT;
 
-      // Per-chomp cycle: each bite DRIVES the skull one step forward.
-      // Rise (0..0.45): skull lifts up, jaw opens — anticipation, barely advances.
-      // Snap (0.45..1.0): skull lunges forward + down, jaw closes — the strike.
       const chompIndex = Math.floor(progress * s.chompCount);
       const chompPhase = (progress * s.chompCount) % 1;
       const zPerChomp = s.lungeZ / s.chompCount;
-      const completedZ = chompIndex * zPerChomp;
+      const env = chompEnvelope(chompPhase);
 
-      // Z advances mostly during the snap (second half of each bite)
-      let stepZ: number;
-      if (chompPhase < 0.45) {
-        stepZ = 0.1 * easeIn(chompPhase / 0.45);         // 10% during rise
-      } else {
-        stepZ = 0.1 + 0.9 * easeOut((chompPhase - 0.45) / 0.55); // 90% during snap
-      }
-      const z = completedZ + zPerChomp * stepZ;
-
-      // Scale tracks total z-progress
-      const scale = 1 + (LUNGE_SCALE - 1) * (z / s.lungeZ);
-
-      // Asymmetric y-arc: slow rise (anticipation), fast fall (strike)
-      let arcY: number;
-      if (chompPhase < 0.45) {
-        arcY = CHOMP_ARC_HEIGHT * easeOut(chompPhase / 0.45);
-      } else {
-        arcY = CHOMP_ARC_HEIGHT * (1 - easeIn((chompPhase - 0.45) / 0.55));
-      }
-
-      // Pitch nod: nose lifts during rise, dips on strike
-      let pitchNod: number;
-      if (chompPhase < 0.45) {
-        pitchNod = -CHOMP_PITCH_WOBBLE * easeOut(chompPhase / 0.45);
-      } else {
-        pitchNod = -CHOMP_PITCH_WOBBLE * (1 - easeIn((chompPhase - 0.45) / 0.55));
-      }
+      // Z: 10% during rise, 90% during snap
+      const stepZ = chompPhase < CHOMP_SPLIT
+        ? 0.1 * easeIn(chompPhase / CHOMP_SPLIT)
+        : 0.1 + 0.9 * easeOut((chompPhase - CHOMP_SPLIT) / (1 - CHOMP_SPLIT));
+      const z = chompIndex * zPerChomp + zPerChomp * stepZ;
 
       // Jaw: opens during rise, snaps shut during strike
       let jaw: number;
@@ -149,27 +150,28 @@ export function createIdleActions(): IdleActionsHandle {
       } else {
         jaw = CHOMP_JAW_ANGLE * (1 - easeOut((chompPhase - 0.5) / 0.5));
       }
-      // Deterministic per-chomp amplitude variation
       jaw *= 0.85 + 0.3 * ((Math.sin(chompIndex * 2.7 + 0.5) + 1) / 2);
 
-      return {
-        rotation: { yaw, pitch: basePitch + pitchNod },
-        positionOffset: { x: 0, y: arcY, z },
-        scaleFactor: scale,
-        jawAngle: jaw,
-      };
+      f.rotation.yaw = yaw;
+      f.rotation.pitch = basePitch + (-CHOMP_PITCH_WOBBLE * env);
+      f.positionOffset.x = 0;
+      f.positionOffset.y = CHOMP_ARC_HEIGHT * env;
+      f.positionOffset.z = z;
+      f.scaleFactor = 1 + (LUNGE_SCALE - 1) * (z / s.lungeZ);
+      f.jawAngle = jaw;
+      return f;
     }
 
-    // Retreat: ease back toward starting orientation and resting position
+    // Retreat
     const t = easeOut(progress);
-    const retreatYaw = s.targetYaw + (s.startYaw - s.targetYaw) * t;
-    const retreatPitch = s.targetPitch + (s.startPitch - s.targetPitch) * t;
-    return {
-      rotation: { yaw: retreatYaw, pitch: retreatPitch },
-      positionOffset: { x: 0, y: 0, z: s.lungeZ * (1 - t) },
-      scaleFactor: 1 + (LUNGE_SCALE - 1) * (1 - t),
-      jawAngle: null,
-    };
+    f.rotation.yaw = s.targetYaw + (s.startYaw - s.targetYaw) * t;
+    f.rotation.pitch = s.targetPitch + (s.startPitch - s.targetPitch) * t;
+    f.positionOffset.x = 0;
+    f.positionOffset.y = 0;
+    f.positionOffset.z = s.lungeZ * (1 - t);
+    f.scaleFactor = 1 + (LUNGE_SCALE - 1) * (1 - t);
+    f.jawAngle = null;
+    return f;
   }
 
   function tickSpin(s: SpinState, dt: number): IdleActionFrame {
@@ -184,62 +186,65 @@ export function createIdleActions(): IdleActionsHandle {
           s.phaseDuration = s.spinDuration;
           break;
         case 'spin':
-          s.settleStartYaw = s.currentYaw;
           s.phase = 'settle';
           s.age = 0;
           s.phaseDuration = SETTLE_DURATION;
           break;
         case 'settle':
-          state = null;  // done
+          state = null;
           break;
       }
     }
+
+    const f = spinFrame;
 
     switch (s.phase) {
       case 'windup': {
         const t = easeIn(progress);
         s.currentY = -WINDUP_DIP * t;
-        return {
-          rotation: { yaw: s.startYaw, pitch: 0 },
-          positionOffset: { x: 0, y: s.currentY, z: 0 },
-          scaleFactor: 1,
-          jawAngle: null,
-        };
+        f.rotation = { yaw: s.startYaw, pitch: 0 };
+        f.positionOffset.x = 0;
+        f.positionOffset.y = s.currentY;
+        f.positionOffset.z = 0;
+        f.scaleFactor = 1;
+        f.jawAngle = null;
+        return f;
       }
       case 'spin': {
-        // sin² velocity curve: accelerate, cruise, decelerate
-        // Integral of sin²(π*t) from 0 to t = t/2 - sin(2πt)/(4π)
-        // Normalized so total integral = 0.5 → multiply by 2 to get 0..1
         const rawIntegral = progress / 2 - Math.sin(2 * Math.PI * progress) / (4 * Math.PI);
-        const yawProgress = rawIntegral * 2;  // 0..1 over full spin
+        const yawProgress = rawIntegral * 2;
         s.currentYaw = s.startYaw + yawProgress * Math.PI * 2;
-        // Y bob: 2 full sine cycles over the spin
         s.currentY = -WINDUP_DIP + BOB_AMPLITUDE * Math.sin(BOB_CYCLES * 2 * Math.PI * progress);
-        return {
-          rotation: { yaw: s.currentYaw, pitch: 0 },
-          positionOffset: { x: 0, y: s.currentY, z: 0 },
-          scaleFactor: 1,
-          jawAngle: null,
-        };
+        f.rotation = { yaw: s.currentYaw, pitch: 0 };
+        f.positionOffset.x = 0;
+        f.positionOffset.y = s.currentY;
+        f.positionOffset.z = 0;
+        f.scaleFactor = 1;
+        f.jawAngle = null;
+        return f;
       }
       case 'settle': {
-        // Re-compute progress using the settle phase's own age (handles transition frame)
         const t = Math.min(1, s.age / s.phaseDuration);
-        // Damped sine for overshoot: starts at currentY, overshoots 0, settles
         const envelope = 1 - t;
         const overshoot = SETTLE_OVERSHOOT * Math.sin(Math.PI * t) * envelope;
         const settleY = s.currentY * (1 - easeOut(t)) + overshoot;
-        return {
-          // No rotation override during settle — skull.ts calls syncTo to return
-          // smoothly to the resting look direction via skullMotion's lerp.
-          rotation: null,
-          positionOffset: { x: 0, y: settleY, z: 0 },
-          scaleFactor: 1,
-          jawAngle: null,
-        };
+        // No rotation override during settle — blend system fades back to skullMotion
+        f.rotation = null;
+        f.positionOffset.x = 0;
+        f.positionOffset.y = settleY;
+        f.positionOffset.z = 0;
+        f.scaleFactor = 1;
+        f.jawAngle = null;
+        return f;
       }
     }
-    return { rotation: null, positionOffset: { x: 0, y: 0, z: 0 }, scaleFactor: 1, jawAngle: null };
+    f.rotation = null;
+    f.positionOffset.x = 0;
+    f.positionOffset.y = 0;
+    f.positionOffset.z = 0;
+    f.scaleFactor = 1;
+    f.jawAngle = null;
+    return f;
   }
 
   return {
@@ -275,7 +280,6 @@ export function createIdleActions(): IdleActionsHandle {
         startYaw,
         currentYaw: startYaw,
         currentY: 0,
-        settleStartYaw: 0,
       };
       return true;
     },

@@ -16,8 +16,6 @@ export interface SkullMotionHandle {
   getPitch(): number;
   /** Start a short damped head-shake animation overlaid on the current yaw. */
   triggerShake(): void;
-  /** Teleport internal state to match an externally-imposed rotation. */
-  syncTo(yaw: number, pitch: number): void;
   /** Apply the current look target to the scene (lerped) this frame. */
   tick(dt: number): void;
 }
@@ -69,12 +67,6 @@ export function createSkullMotion(scene: SceneHandle): SkullMotionHandle {
     },
     triggerShake() {
       shakeAge = 0;
-    },
-    syncTo(y, p) {
-      yaw = y;
-      pitch = p;
-      yawTarget = y;
-      pitchTarget = p;
     },
     tick(dt) {
       const rate = 1 - Math.exp(-dt / tau);
