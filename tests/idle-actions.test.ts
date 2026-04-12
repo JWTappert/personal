@@ -142,6 +142,33 @@ describe('IdleActions — spin', () => {
     // Should have rotated approximately 2*PI (±10%)
     expect(Math.abs(totalYaw)).toBeGreaterThan(Math.PI * 2 * 0.9);
   });
+
+  it('spin with startYaw begins windup at the provided yaw', () => {
+    const actions = make();
+    const startYaw = 0.42;
+    actions.triggerSpin(startYaw);
+    // First frame is still in windup — rotation should hold startYaw
+    const frame = actions.tick(0.001);
+    expect(frame).not.toBeNull();
+    expect(frame!.rotation).not.toBeNull();
+    // Windup holds startYaw; yaw should equal startYaw exactly at t≈0
+    expect(frame!.rotation!.yaw).toBeCloseTo(startYaw, 5);
+  });
+
+  it('spin accumulates from startYaw through a full cycle', () => {
+    const actions = make();
+    const startYaw = 1.0;
+    actions.triggerSpin(startYaw);
+    let maxYaw = -Infinity;
+    for (let i = 0; i < 200; i++) {
+      const f = actions.tick(0.016);
+      if (f && f.rotation) {
+        maxYaw = Math.max(maxYaw, f.rotation.yaw);
+      }
+    }
+    // Max yaw should be at least startYaw + π (half rotation through the spin)
+    expect(maxYaw).toBeGreaterThan(startYaw + Math.PI);
+  });
 });
 
 describe('IdleActions — mutual exclusion', () => {

@@ -294,6 +294,10 @@ export function createIdleActions(): IdleActionsHandle {
 
     triggerSpin(startYaw = 0) {
       if (state !== null) return false;
+      // startYaw is the skull's current smoothed yaw at trigger time.
+      // Seeding both startYaw and currentYaw from it ensures the windup
+      // phase holds the correct facing angle and the spin phase accumulates
+      // rotation from the right origin — no jump on first frame.
       state = {
         type: 'spin',
         phase: 'windup',
