@@ -233,8 +233,8 @@ async function boot() {
       const orbit = bus.getOrbit();
       skullMotion.lookAt(orbit.x, orbit.y);
     } else if (!idle.isActive()) {
-      const wobbleX = Math.sin(t * 0.23) * 0.14;
-      const wobbleY = Math.cos(t * 0.19) * 0.07;
+      const wobbleX = reducedMotion ? 0 : Math.sin(t * 0.23) * 0.14;
+      const wobbleY = reducedMotion ? 0 : Math.cos(t * 0.19) * 0.07;
       const targetYaw = cursorState.x * 0.7 + wobbleX;
       const targetPitch = -cursorState.y * 0.3 + wobbleY;
       skullMotion.lookAt(targetYaw, targetPitch);
