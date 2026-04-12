@@ -86,3 +86,83 @@ describe('IdleActions — chomp', () => {
     expect(sawJawClosed).toBe(true);
   });
 });
+
+describe('IdleActions — spin', () => {
+  function make() {
+    return createIdleActions();
+  }
+
+  it('triggerSpin starts playing and returns frames', () => {
+    const actions = make();
+    const started = actions.triggerSpin();
+    expect(started).toBe(true);
+    expect(actions.isPlaying()).toBe(true);
+    const frame = actions.tick(0.016);
+    expect(frame).not.toBeNull();
+  });
+
+  it('spin completes after sufficient time', () => {
+    const actions = make();
+    actions.triggerSpin();
+    // Advance well past max spin duration (~3s)
+    for (let i = 0; i < 250; i++) actions.tick(0.016);
+    expect(actions.isPlaying()).toBe(false);
+  });
+
+  it('spin produces y-axis bob during rotation', () => {
+    const actions = make();
+    actions.triggerSpin();
+    // Skip wind-up (~0.2s)
+    for (let i = 0; i < 15; i++) actions.tick(0.016);
+    // During spin phase, y offset should vary (bobbing)
+    let minY = 0, maxY = 0;
+    for (let i = 0; i < 100; i++) {
+      const f = actions.tick(0.016);
+      if (f) {
+        minY = Math.min(minY, f.positionOffset.y);
+        maxY = Math.max(maxY, f.positionOffset.y);
+      }
+    }
+    expect(maxY - minY).toBeGreaterThan(0.1);
+  });
+
+  it('spin produces a full 360° yaw rotation', () => {
+    const actions = make();
+    actions.triggerSpin();
+    let totalYaw = 0;
+    let prevYaw = 0;
+    for (let i = 0; i < 250; i++) {
+      const f = actions.tick(0.016);
+      if (f && f.rotation) {
+        const delta = f.rotation.yaw - prevYaw;
+        totalYaw += delta;
+        prevYaw = f.rotation.yaw;
+      }
+    }
+    // Should have rotated approximately 2*PI (±10%)
+    expect(Math.abs(totalYaw)).toBeGreaterThan(Math.PI * 2 * 0.9);
+  });
+});
+
+describe('IdleActions — mutual exclusion', () => {
+  it('cannot trigger spin while chomp is playing', () => {
+    const actions = createIdleActions();
+    actions.triggerChomp(0, 0);
+    expect(actions.triggerSpin()).toBe(false);
+  });
+
+  it('cannot trigger chomp while spin is playing', () => {
+    const actions = createIdleActions();
+    actions.triggerSpin();
+    expect(actions.triggerChomp(0, 0)).toBe(false);
+  });
+
+  it('can trigger after previous action completes', () => {
+    const actions = createIdleActions();
+    actions.triggerChomp(0, 0);
+    // Run to completion
+    for (let i = 0; i < 250; i++) actions.tick(0.016);
+    expect(actions.isPlaying()).toBe(false);
+    expect(actions.triggerSpin()).toBe(true);
+  });
+});
