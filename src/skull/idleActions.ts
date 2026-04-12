@@ -10,7 +10,7 @@ export interface IdleActionFrame {
 }
 
 export interface IdleActionsHandle {
-  triggerChomp(cursorX: number, cursorY: number): boolean;
+  triggerChomp(cursorX: number, cursorY: number, startYaw?: number, startPitch?: number): boolean;
   triggerSpin(startYaw?: number): boolean;
   tick(dt: number): IdleActionFrame | null;
   isPlaying(): boolean;
@@ -59,6 +59,8 @@ interface ChompState {
   phase: ChompPhase;
   age: number;
   phaseDuration: number;
+  startYaw: number;
+  startPitch: number;
   targetYaw: number;
   targetPitch: number;
   lungeZ: number;
@@ -96,10 +98,11 @@ export function createIdleActions(): IdleActionsHandle {
     }
 
     if (s.phase === 'advance') {
-      // Aim toward cursor: completes in the first third of the advance
+      // Aim: lerp from starting orientation toward cursor target.
+      // Completes in the first third of the advance.
       const aimT = easeOut(Math.min(1, progress * 3));
-      const yaw = s.targetYaw * aimT;
-      const basePitch = s.targetPitch * aimT;
+      const yaw = s.startYaw + (s.targetYaw - s.startYaw) * aimT;
+      const basePitch = s.startPitch + (s.targetPitch - s.startPitch) * aimT;
 
       // Per-chomp cycle: each bite DRIVES the skull one step forward.
       // Rise (0..0.45): skull lifts up, jaw opens — anticipation, barely advances.
@@ -157,10 +160,12 @@ export function createIdleActions(): IdleActionsHandle {
       };
     }
 
-    // Retreat: ease everything back to resting
+    // Retreat: ease back toward starting orientation and resting position
     const t = easeOut(progress);
+    const retreatYaw = s.targetYaw + (s.startYaw - s.targetYaw) * t;
+    const retreatPitch = s.targetPitch + (s.startPitch - s.targetPitch) * t;
     return {
-      rotation: { yaw: s.targetYaw * (1 - t), pitch: s.targetPitch * (1 - t) },
+      rotation: { yaw: retreatYaw, pitch: retreatPitch },
       positionOffset: { x: 0, y: 0, z: s.lungeZ * (1 - t) },
       scaleFactor: 1 + (LUNGE_SCALE - 1) * (1 - t),
       jawAngle: null,
@@ -238,13 +243,15 @@ export function createIdleActions(): IdleActionsHandle {
   }
 
   return {
-    triggerChomp(cursorX, cursorY) {
+    triggerChomp(cursorX, cursorY, startYaw = 0, startPitch = 0) {
       if (state !== null) return false;
       state = {
         type: 'chomp',
         phase: 'advance',
         age: 0,
         phaseDuration: ADVANCE_DURATION,
+        startYaw,
+        startPitch,
         targetYaw: cursorX * 0.7,
         targetPitch: -cursorY * 0.3,
         lungeZ: LUNGE_Z_MIN + Math.random() * (LUNGE_Z_MAX - LUNGE_Z_MIN),

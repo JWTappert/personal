@@ -159,7 +159,10 @@ export function createIdleBehavior(
 
         if (chompCooldown <= 0) {
           const cursor = bus.getCursor();
-          const triggered = actions.triggerChomp(cursor.x, cursor.y);
+          const triggered = actions.triggerChomp(
+            cursor.x, cursor.y,
+            skullMotion.getYaw(), skullMotion.getPitch()
+          );
           if (triggered) {
             chompCooldown = 45 + Math.random() * 45;
             postActionCooldown = 10;
