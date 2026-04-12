@@ -113,6 +113,16 @@ export function createInteractions(
   }
 
   function onClick(e: PointerEvent) {
+    // On touch, pointermove doesn't fire without a drag, so the cursor
+    // never tracks the user. Piggyback the tap: set the cursor to the
+    // tap location so the lazy-eye lookAt path in skull.ts briefly aims
+    // there. emit('click') below stamps lastInput, so idle deactivates
+    // for its standard threshold, giving the lerp time to travel.
+    // On desktop this overwrites the cursor with the same values it
+    // already had — a no-op.
+    const rect = canvas.getBoundingClientRect();
+    cursor.x = ((e.clientX - rect.left) / rect.width) * 2 - 1;
+    cursor.y = -(((e.clientY - rect.top) / rect.height) * 2 - 1);
     const result = pickSkullPart(e);
     emit('click', result);
   }

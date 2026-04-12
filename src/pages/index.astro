@@ -72,8 +72,9 @@
         position: fixed;
         top: 75%; left: 50%;
         transform: translate(-50%, -50%);
-        font-size: 44px;
+        font-size: clamp(28px, 8vw, 44px);
         letter-spacing: 0.3em;
+        white-space: nowrap;
         color: rgb(var(--hud-rgb));
         text-shadow: 0 0 14px rgb(var(--hud-rgb)),
                      0 0 30px rgb(var(--hud-rgb));

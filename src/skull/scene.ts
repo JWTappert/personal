@@ -21,17 +21,22 @@ export interface SceneHandle {
   setMaterial(mat: THREE.Material): void;
 }
 
+const BASE_CAMERA_Z = 12;
+
+// Portrait / narrow viewports pull the camera back so the skull fits
+// horizontally. Square or wider uses BASE_CAMERA_Z unchanged; a half-width
+// portrait phone ends up ~1.4× further away.
+function cameraZForAspect(aspect: number): number {
+  return aspect >= 1 ? BASE_CAMERA_Z : BASE_CAMERA_Z / Math.sqrt(aspect);
+}
+
 export async function createScene(canvas: HTMLCanvasElement): Promise<SceneHandle> {
   const scene = new THREE.Scene();
   scene.background = new THREE.Color(0x000000);
 
-  const camera = new THREE.PerspectiveCamera(
-    60,
-    window.innerWidth / window.innerHeight,
-    0.1,
-    100
-  );
-  camera.position.z = 12;
+  const initialAspect = window.innerWidth / window.innerHeight;
+  const camera = new THREE.PerspectiveCamera(60, initialAspect, 0.1, 100);
+  camera.position.z = cameraZForAspect(initialAspect);
 
   const renderer = new THREE.WebGLRenderer({
     canvas,
@@ -131,9 +136,11 @@ export async function createScene(canvas: HTMLCanvasElement): Promise<SceneHandl
     resize() {
       const w = window.innerWidth;
       const h = window.innerHeight;
+      const aspect = w / h;
       renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
       renderer.setSize(w, h, false);
-      camera.aspect = w / h;
+      camera.aspect = aspect;
+      camera.position.z = cameraZForAspect(aspect);
       camera.updateProjectionMatrix();
     },
     getTime() {
