@@ -26,7 +26,10 @@ export interface InteractionBus {
   isTouch(): boolean;
 }
 
-const clampPitch = (v: number) => Math.max(-0.6, Math.min(0.6, v));
+// Touch drag tuning. Yaw is unbounded; pitch clamps so the head can't flip.
+const TOUCH_YAW_SENSITIVITY = 2.0;    // full canvas-width drag → 2 rad yaw
+const TOUCH_PITCH_SENSITIVITY = 1.5;  // full canvas-height drag → 1.5 rad pitch
+const TOUCH_PITCH_CLAMP = 0.6;        // ~±34° pitch limit
 
 export function createInteractions(
   canvas: HTMLCanvasElement,
@@ -39,7 +42,7 @@ export function createInteractions(
   let lastInput = performance.now();
 
   const orbit = { x: 0, y: 0 };
-  let isTouchDevice = false;
+  let hadTouchInput = false;
   let dragging = false;
   let dragStartClientX = 0;
   let dragStartClientY = 0;
@@ -58,7 +61,7 @@ export function createInteractions(
 
   function onPointerDown(e: PointerEvent) {
     if (e.pointerType !== 'touch') return;
-    isTouchDevice = true;
+    hadTouchInput = true;
     dragging = true;
     dragStartClientX = e.clientX;
     dragStartClientY = e.clientY;
@@ -67,6 +70,7 @@ export function createInteractions(
     dragStartPitch = current.pitch;
     orbit.x = current.yaw;
     orbit.y = current.pitch;
+    // Stamp on down (not just move) so idle stays inactive even if the user holds without moving.
     lastInput = performance.now();
   }
 
@@ -80,8 +84,8 @@ export function createInteractions(
       const rect = canvas.getBoundingClientRect();
       const dx = (e.clientX - dragStartClientX) / rect.width;
       const dy = (e.clientY - dragStartClientY) / rect.height;
-      orbit.x = dragStartYaw + dx * 2.0;
-      orbit.y = clampPitch(dragStartPitch + dy * 1.5);
+      orbit.x = dragStartYaw + dx * TOUCH_YAW_SENSITIVITY;
+      orbit.y = Math.max(-TOUCH_PITCH_CLAMP, Math.min(TOUCH_PITCH_CLAMP, dragStartPitch + dy * TOUCH_PITCH_SENSITIVITY));
       lastInput = performance.now();
       return;
     }
@@ -175,6 +179,6 @@ export function createInteractions(
     },
     getOrbit() { return { ...orbit }; },
     isDragging() { return dragging; },
-    isTouch() { return isTouchDevice; },
+    isTouch() { return hadTouchInput; },
   };
 }
