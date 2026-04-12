@@ -1,5 +1,7 @@
 import type { InteractionBus } from './interactions';
 import type { SkullMotionHandle } from './skullMotion';
+import { createIdleActions } from './idleActions';
+import type { IdleActionsHandle, IdleActionFrame } from './idleActions';
 
 export interface IdleHandle {
   tick(dt: number): void;
@@ -7,6 +9,10 @@ export interface IdleHandle {
   isActive(): boolean;
   /** 0..1 idle burst intensity for the composer glitch slot. */
   getGlitchBurst(): number;
+  /** Current action frame if an action is playing, or null. */
+  getActionFrame(): IdleActionFrame | null;
+  /** True while a chomp or spin is in progress. */
+  isActionPlaying(): boolean;
 }
 
 const IDLE_ACTIVATION = 0.4;
@@ -37,6 +43,13 @@ export function createIdleBehavior(
   let pulseAmp = 0;
   /** Envelope shape exponent. ~0.55 = pointed accent, ~1.0 = round bell. */
   let pulseShape = 1;
+
+  // Action scheduling
+  const actions: IdleActionsHandle = createIdleActions();
+  let actionFrame: IdleActionFrame | null = null;
+  let chompCooldown = 45 + Math.random() * 45;  // 45..90s initial
+  let spinCooldown = 45 + Math.random() * 45;   // 45..90s initial
+  let postActionCooldown = 0;
 
   const reset = () => {
     idleness = 0;
@@ -105,7 +118,7 @@ export function createIdleBehavior(
 
   return {
     tick(dt: number) {
-      // idleness ramp: starts after 1s of no input, reaches 1.0 over 8s
+      // 1. Idleness ramp: starts after 1s of no input, reaches 1.0 over 8s
       const idleMs = performance.now() - bus.getLastInputTime();
       if (idleMs > 1000) {
         idleness = Math.min(1, (idleMs - 1000) / 8000);
@@ -115,7 +128,52 @@ export function createIdleBehavior(
 
       const active = idleness > IDLE_ACTIVATION;
 
-      // Look-around scheduler
+      // 2. Glitch burst — runs during actions too
+      if (idleness > GLITCH_GATE) {
+        burstCooldown -= dt;
+        if (burstCooldown <= 0) {
+          burst = 1;
+          burstCooldown = 2 + Math.random() * 2 - idleness;
+        }
+      }
+      burst = Math.max(0, burst - dt / 0.15);
+
+      // 3. Tick action state machine
+      actionFrame = actions.tick(dt);
+
+      // 4. If an action is playing, suspend look-around + talk and early-return
+      if (actions.isPlaying()) {
+        wasActive = active;
+        return;
+      }
+
+      // 5. Post-action cooldown countdown
+      if (postActionCooldown > 0) {
+        postActionCooldown = Math.max(0, postActionCooldown - dt);
+      }
+
+      // 6. Action scheduling — only when idle and cooled down
+      if (active && postActionCooldown <= 0) {
+        chompCooldown -= dt;
+        spinCooldown -= dt;
+
+        if (chompCooldown <= 0) {
+          const cursor = bus.getCursor();
+          const triggered = actions.triggerChomp(cursor.x, cursor.y);
+          if (triggered) {
+            chompCooldown = 45 + Math.random() * 45;
+            postActionCooldown = 10;
+          }
+        } else if (spinCooldown <= 0) {
+          const triggered = actions.triggerSpin(skullMotion.getYaw());
+          if (triggered) {
+            spinCooldown = 45 + Math.random() * 45;
+            postActionCooldown = 10;
+          }
+        }
+      }
+
+      // 7. Look-around scheduler
       if (active) {
         if (!wasActive) {
           pickLookTarget();
@@ -129,7 +187,7 @@ export function createIdleBehavior(
         }
       }
 
-      // Talk scheduler
+      // 8. Talk scheduler
       if (active) {
         if (talkPhase === 'silent') {
           talkTimer -= dt;
@@ -165,16 +223,7 @@ export function createIdleBehavior(
         talkTimer = 1.5 + Math.random() * 2.5;
       }
 
-      // Glitch burst (unchanged logic; gated on idleness instead of the removed decayLevel)
-      if (idleness > GLITCH_GATE) {
-        burstCooldown -= dt;
-        if (burstCooldown <= 0) {
-          burst = 1;
-          burstCooldown = 2 + Math.random() * 2 - idleness;
-        }
-      }
-      burst = Math.max(0, burst - dt / 0.15);
-
+      // 9. Update wasActive
       wasActive = active;
     },
     isActive() {
@@ -182,6 +231,12 @@ export function createIdleBehavior(
     },
     getGlitchBurst() {
       return burst;
+    },
+    getActionFrame() {
+      return actionFrame;
+    },
+    isActionPlaying() {
+      return actions.isPlaying();
     },
   };
 }

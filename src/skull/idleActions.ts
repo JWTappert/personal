@@ -11,7 +11,7 @@ export interface IdleActionFrame {
 
 export interface IdleActionsHandle {
   triggerChomp(cursorX: number, cursorY: number): boolean;
-  triggerSpin(): boolean;
+  triggerSpin(startYaw?: number): boolean;
   tick(dt: number): IdleActionFrame | null;
   isPlaying(): boolean;
 }
@@ -292,7 +292,7 @@ export function createIdleActions(): IdleActionsHandle {
       return true;
     },
 
-    triggerSpin() {
+    triggerSpin(startYaw = 0) {
       if (state !== null) return false;
       state = {
         type: 'spin',
@@ -300,8 +300,8 @@ export function createIdleActions(): IdleActionsHandle {
         age: 0,
         phaseDuration: WINDUP_DURATION,
         spinDuration: SPIN_DURATION_MIN + Math.random() * (SPIN_DURATION_MAX - SPIN_DURATION_MIN),
-        startYaw: 0,
-        currentYaw: 0,
+        startYaw,
+        currentYaw: startYaw,
         currentY: 0,
         settleStartYaw: 0,
       };
