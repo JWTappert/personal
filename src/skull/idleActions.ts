@@ -96,33 +96,57 @@ export function createIdleActions(): IdleActionsHandle {
     }
 
     if (s.phase === 'advance') {
-      // Smooth forward progression over the full advance
-      const zT = easeOut(progress);
-      const z = s.lungeZ * zT;
-      const scale = 1 + (LUNGE_SCALE - 1) * zT;
-
       // Aim toward cursor: completes in the first third of the advance
       const aimT = easeOut(Math.min(1, progress * 3));
       const yaw = s.targetYaw * aimT;
       const basePitch = s.targetPitch * aimT;
 
-      // Per-chomp arc: each bite bobs the skull up and opens the jaw
-      const chompPhase = (progress * s.chompCount) % 1; // 0..1 within each bite
-      const arcY = CHOMP_ARC_HEIGHT * Math.sin(Math.PI * chompPhase);
-      const pitchNod = -CHOMP_PITCH_WOBBLE * Math.sin(Math.PI * chompPhase);
+      // Per-chomp cycle: each bite DRIVES the skull one step forward.
+      // Rise (0..0.45): skull lifts up, jaw opens — anticipation, barely advances.
+      // Snap (0.45..1.0): skull lunges forward + down, jaw closes — the strike.
+      const chompIndex = Math.floor(progress * s.chompCount);
+      const chompPhase = (progress * s.chompCount) % 1;
+      const zPerChomp = s.lungeZ / s.chompCount;
+      const completedZ = chompIndex * zPerChomp;
 
-      // Jaw: opens during arc rise, snaps shut on arc fall
-      let jaw: number;
+      // Z advances mostly during the snap (second half of each bite)
+      let stepZ: number;
       if (chompPhase < 0.45) {
-        jaw = CHOMP_JAW_ANGLE * easeIn(chompPhase / 0.45);
-      } else if (chompPhase < 0.55) {
-        jaw = CHOMP_JAW_ANGLE; // brief hold at peak
+        stepZ = 0.1 * easeIn(chompPhase / 0.45);         // 10% during rise
       } else {
-        jaw = CHOMP_JAW_ANGLE * (1 - easeOut((chompPhase - 0.55) / 0.45));
+        stepZ = 0.1 + 0.9 * easeOut((chompPhase - 0.45) / 0.55); // 90% during snap
+      }
+      const z = completedZ + zPerChomp * stepZ;
+
+      // Scale tracks total z-progress
+      const scale = 1 + (LUNGE_SCALE - 1) * (z / s.lungeZ);
+
+      // Asymmetric y-arc: slow rise (anticipation), fast fall (strike)
+      let arcY: number;
+      if (chompPhase < 0.45) {
+        arcY = CHOMP_ARC_HEIGHT * easeOut(chompPhase / 0.45);
+      } else {
+        arcY = CHOMP_ARC_HEIGHT * (1 - easeIn((chompPhase - 0.45) / 0.55));
       }
 
-      // Deterministic per-chomp amplitude variation (avoids jittery per-frame random)
-      const chompIndex = Math.floor(progress * s.chompCount);
+      // Pitch nod: nose lifts during rise, dips on strike
+      let pitchNod: number;
+      if (chompPhase < 0.45) {
+        pitchNod = -CHOMP_PITCH_WOBBLE * easeOut(chompPhase / 0.45);
+      } else {
+        pitchNod = -CHOMP_PITCH_WOBBLE * (1 - easeIn((chompPhase - 0.45) / 0.55));
+      }
+
+      // Jaw: opens during rise, snaps shut during strike
+      let jaw: number;
+      if (chompPhase < 0.4) {
+        jaw = CHOMP_JAW_ANGLE * easeIn(chompPhase / 0.4);
+      } else if (chompPhase < 0.5) {
+        jaw = CHOMP_JAW_ANGLE;
+      } else {
+        jaw = CHOMP_JAW_ANGLE * (1 - easeOut((chompPhase - 0.5) / 0.5));
+      }
+      // Deterministic per-chomp amplitude variation
       jaw *= 0.85 + 0.3 * ((Math.sin(chompIndex * 2.7 + 0.5) + 1) / 2);
 
       return {
