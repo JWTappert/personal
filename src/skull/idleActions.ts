@@ -1,6 +1,8 @@
 export interface IdleActionFrame {
   /** Direct rotation to apply. Null = don't override. */
   rotation: { yaw: number; pitch: number } | null;
+  /** Roll (Z-axis rotation). Null = don't override. */
+  roll: number | null;
   /** Additive position offsets. */
   positionOffset: { x: number; y: number; z: number };
   /** Scale multiplier (1.0 = resting scale unchanged). */
@@ -23,10 +25,12 @@ const ADVANCE_DURATION = 1.2;
 const CHOMP_RETREAT_DURATION = 0.4;
 const LUNGE_Z_MIN = 2;
 const LUNGE_Z_MAX = 3;
-const LUNGE_SCALE = 1.2;          // peak scale multiplier over resting
+const LUNGE_SCALE = 1.05;         // peak scale multiplier (perspective does the rest)
 const CHOMP_JAW_ANGLE = 0.6;      // peak jaw open per bite (rad)
 const CHOMP_ARC_HEIGHT = 0.3;     // y-bob amplitude per bite
 const CHOMP_PITCH_WOBBLE = 0.15;  // pitch nod per bite (nose-up on rise)
+const CHOMP_ROLL = 0.12;          // roll amplitude per bite (rad, ~7°)
+const CHOMP_X_WEAVE = 0.15;       // lateral weave amplitude per bite
 
 // Spin tuning
 const WINDUP_DURATION = 0.2;
@@ -97,12 +101,14 @@ export function createIdleActions(): IdleActionsHandle {
   // Pre-allocated frame objects — mutated in-place to avoid GC churn at 60fps.
   const chompFrame: IdleActionFrame = {
     rotation: { yaw: 0, pitch: 0 },
+    roll: null,
     positionOffset: { x: 0, y: 0, z: 0 },
     scaleFactor: 1,
     jawAngle: null,
   };
   const spinFrame: IdleActionFrame = {
     rotation: { yaw: 0, pitch: 0 },
+    roll: null,
     positionOffset: { x: 0, y: 0, z: 0 },
     scaleFactor: 1,
     jawAngle: null,
@@ -152,9 +158,13 @@ export function createIdleActions(): IdleActionsHandle {
       }
       jaw *= 0.85 + 0.3 * ((Math.sin(chompIndex * 2.7 + 0.5) + 1) / 2);
 
+      // Alternate roll and X-weave direction per chomp for a rocking lunge
+      const side = chompIndex % 2 === 0 ? 1 : -1;
+
       f.rotation.yaw = yaw;
       f.rotation.pitch = basePitch + (-CHOMP_PITCH_WOBBLE * env);
-      f.positionOffset.x = 0;
+      f.roll = side * CHOMP_ROLL * env;
+      f.positionOffset.x = side * CHOMP_X_WEAVE * env;
       f.positionOffset.y = CHOMP_ARC_HEIGHT * env;
       f.positionOffset.z = z;
       f.scaleFactor = 1 + (LUNGE_SCALE - 1) * (z / s.lungeZ);
@@ -166,6 +176,7 @@ export function createIdleActions(): IdleActionsHandle {
     const t = easeOut(progress);
     f.rotation.yaw = s.targetYaw + (s.startYaw - s.targetYaw) * t;
     f.rotation.pitch = s.targetPitch + (s.startPitch - s.targetPitch) * t;
+    f.roll = null;
     f.positionOffset.x = 0;
     f.positionOffset.y = 0;
     f.positionOffset.z = s.lungeZ * (1 - t);

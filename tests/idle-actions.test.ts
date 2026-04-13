@@ -85,6 +85,41 @@ describe('IdleActions — chomp', () => {
     expect(sawJawOpen).toBe(true);
     expect(sawJawClosed).toBe(true);
   });
+
+  it('chomp produces roll and x-weave during advance', () => {
+    const actions = make();
+    actions.triggerChomp(0, 0);
+    let sawRoll = false;
+    let sawXWeave = false;
+    for (let i = 0; i < 75; i++) {
+      const f = actions.tick(0.016);
+      if (f) {
+        if (f.roll !== null && Math.abs(f.roll) > 0.01) sawRoll = true;
+        if (Math.abs(f.positionOffset.x) > 0.01) sawXWeave = true;
+      }
+    }
+    expect(sawRoll).toBe(true);
+    expect(sawXWeave).toBe(true);
+  });
+
+  it('chomp roll alternates direction between bites', () => {
+    const actions = make();
+    actions.triggerChomp(0, 0);
+    const rollSigns: number[] = [];
+    let lastSign = 0;
+    for (let i = 0; i < 75; i++) {
+      const f = actions.tick(0.016);
+      if (f && f.roll !== null && Math.abs(f.roll) > 0.02) {
+        const sign = Math.sign(f.roll);
+        if (sign !== lastSign) {
+          rollSigns.push(sign);
+          lastSign = sign;
+        }
+      }
+    }
+    // Should see at least 2 different sign transitions (alternating per chomp)
+    expect(rollSigns.length).toBeGreaterThanOrEqual(2);
+  });
 });
 
 describe('IdleActions — spin', () => {

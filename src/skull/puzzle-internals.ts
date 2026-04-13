@@ -37,8 +37,10 @@ const CURATED: Record<string, string[]> = {
   Z: ['ZEROED PAGE 3', 'ZONE 1 ACTIVE', 'ZERO XING'],
 };
 
-// Lines whose first letter is deliberately outside the word to act as padding
-const FILLER = ['··· IDLE ···', '>>> SYS OK', '### LINK FINE', '%%% NOP', '$$$ WAIT'];
+// Filler lines bookending the acrostic. First letters must NOT appear in the
+// secret word so the acrostic window stays unambiguous. Styled to match the
+// system-status format of the curated lines.
+const FILLER = ['WATCHDOG FED', 'BUS 0 CLEAR', 'MUX 1 STABLE', 'HEARTBEAT 72 BPM', 'STACK DEPTH OK'];
 
 export function buildAcrosticPool(word: string): string[] {
   const upper = word.toUpperCase();

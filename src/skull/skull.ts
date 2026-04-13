@@ -285,6 +285,8 @@ async function boot() {
         scene.skull.rotation.y = normalRotY + (actionFrame.rotation.yaw - normalRotY) * blend;
         scene.skull.rotation.x = normalRotX + (actionFrame.rotation.pitch - normalRotX) * blend;
       }
+      // Roll: blend toward action roll (0 when null)
+      scene.skull.rotation.z = actionFrame.roll !== null ? actionFrame.roll * blend : 0;
       // Position: action offsets fade in/out; normal x parallax fades inversely
       scene.skull.position.x = normalPosX * (1 - blend) + actionFrame.positionOffset.x * blend;
       scene.skull.position.y = actionFrame.positionOffset.y * blend;
@@ -295,6 +297,7 @@ async function boot() {
       scene.skull.position.x = normalPosX;
       scene.skull.position.y = 0;
       scene.skull.position.z = 0;
+      scene.skull.rotation.z = 0;
       scene.skull.scale.setScalar(RESTING_SCALE);
     }
 
